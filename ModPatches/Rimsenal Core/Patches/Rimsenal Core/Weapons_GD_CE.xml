@@ -96,12 +96,12 @@
 	<Operation Class="CombatExtended.PatchOperationMakeGunCECompatible">
 		<defName>GD_HybridRifle</defName>
 		<statBases>
-			<Mass>4.4</Mass>
+			<Mass>6.9</Mass> <!-- 4.4 -->
 			<RangedWeapon_Cooldown>0.36</RangedWeapon_Cooldown>
 			<SightsEfficiency>1.75</SightsEfficiency>
-			<ShotSpread>0.06</ShotSpread>
-			<SwayFactor>1.4</SwayFactor>
-			<Bulk>9.6</Bulk>
+			<ShotSpread>0.05</ShotSpread> <!-- 0.6 -->
+			<SwayFactor>1.3</SwayFactor> <!-- 1.4 -->
+			<Bulk>10.9</Bulk> <!-- 9.6 -->
 		</statBases>
 		<Properties>
 			<recoilAmount>2.00</recoilAmount>
@@ -109,9 +109,9 @@
 			<hasStandardCommand>true</hasStandardCommand>
 			<defaultProjectile>Bullet_66Greydale_FMJ_Hybrid</defaultProjectile>
 			<warmupTime>1.05</warmupTime>
-			<range>58</range>
+			<range>66</range> <!-- 59 -->
 			<burstShotCount>6</burstShotCount>
-			<ticksBetweenBurstShots>7</ticksBetweenBurstShots>
+			<ticksBetweenBurstShots>6</ticksBetweenBurstShots> <!-- 7 -->
 			<soundCast>ShotGRH</soundCast>
 			<soundCastTail>GunTail_Medium</soundCastTail>
 			<muzzleFlashScale>9</muzzleFlashScale>
@@ -135,13 +135,50 @@
 		</value>
 	</Operation>
 
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="GD_HybridRifle"]/comps/li[@Class="CompProperties_EquippableAbilityReloadable"]</xpath>
+		<value>
+			<li Class="CombatExtended.CompProperties_UnderBarrel">
+				<propsUnderBarrel>
+					<magazineSize>1</magazineSize>
+					<reloadTime>3</reloadTime>
+					<ammoSet>AmmoSet_25x40mmGrenade</ammoSet>
+				</propsUnderBarrel>
+				<verbPropsUnderBarrel>
+					<recoilAmount>2.51</recoilAmount>
+					<verbClass>CombatExtended.Verb_ShootCE</verbClass>
+					<hasStandardCommand>true</hasStandardCommand>
+					<defaultProjectile>Bullet_25mmGDMicromissile_HEDP</defaultProjectile>
+					<warmupTime>0.55</warmupTime>
+					<range>51</range>
+					<targetParams>
+						<canTargetLocations>true</canTargetLocations>
+					</targetParams>
+					<soundCast>Shot_IncendiaryLauncher</soundCast>
+					<soundCastTail>GunTail_Medium</soundCastTail>
+					<muzzleFlashScale>12</muzzleFlashScale>
+					<burstShotCount>1</burstShotCount>
+				</verbPropsUnderBarrel>
+				<propsFireModesUnderBarrel>
+					<aiUseBurstMode>FALSE</aiUseBurstMode>
+					<aiAimMode>AimedShot</aiAimMode>
+					<aimedBurstShotCount>1</aimedBurstShotCount>
+				</propsFireModesUnderBarrel>
+			</li>
+			<li>
+				<compClass>CompEquippable</compClass>
+			</li>
+		</value>
+	</Operation>
+
+
 	<!-- ========== Hybrid Ocelot =========== -->
 	<Operation Class="CombatExtended.PatchOperationMakeGunCECompatible">
 		<defName>GD_MSSH</defName>
 		<statBases>
 			<WorkToMake>50</WorkToMake>
 			<SightsEfficiency>0.7</SightsEfficiency>
-			<ShotSpread>0.2</ShotSpread>
+			<ShotSpread>0.12</ShotSpread> <!-- 0.2 -->
 			<SwayFactor>1.48</SwayFactor>
 			<Bulk>2.35</Bulk>
 			<Mass>2.1</Mass>
@@ -441,7 +478,7 @@
 			<Bulk>9.45</Bulk>
 		</statBases>
 		<Properties>
-			<recoilAmount>2.00</recoilAmount>
+			<recoilAmount>1.60</recoilAmount> <!-- 2.00 -->
 			<verbClass>CombatExtended.Verb_ShootCE</verbClass>
 			<hasStandardCommand>true</hasStandardCommand>
 			<defaultProjectile>Bullet_66Greydale_FMJ</defaultProjectile>
@@ -574,7 +611,7 @@
 		<statBases>
 			<Mass>6.8</Mass>
 			<RangedWeapon_Cooldown>0.55</RangedWeapon_Cooldown>
-			<SightsEfficiency>1</SightsEfficiency>
+			<SightsEfficiency>1.5</SightsEfficiency> <!-- 1.0-->
 			<ShotSpread>0.07</ShotSpread>
 			<SwayFactor>1.23</SwayFactor>
 			<Bulk>11.75</Bulk>
