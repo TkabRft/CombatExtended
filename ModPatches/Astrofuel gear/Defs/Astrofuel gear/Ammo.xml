@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+	<!-- ==================== AmmoClass ======================== -->
+
+	<CombatExtended.AmmoCategoryDef>
+		<defName>Astrofuel</defName>
+		<label>Astrofuel</label>
+		<description>Prometheum catalyzed astrofuel gel, as much of danger to you as your enemies.</description>
+	</CombatExtended.AmmoCategoryDef>
+
+	<!-- ==================== Fleck ========================== -->
+
+	<FleckDef ParentName="FleckBase_Thrown">
+		<defName>Fleck_AstroflamerTrail</defName>
+		<graphicData>
+			<texPath>ThirdParty/VanillaExpanded/FireGlow_Astro</texPath>
+			<shaderType>MoteGlow</shaderType>
+			<color>(1, 0.5, 0.8)</color>
+		</graphicData>
+		<altitudeLayer>MoteOverhead</altitudeLayer>
+		<fadeInTime>0</fadeInTime>
+		<solidTime>0.03</solidTime>
+		<fadeOutTime>0.25</fadeOutTime>
+		<growthRate>0</growthRate>
+	</FleckDef>
+
+	<!-- ==================== AmmoSet ========================== -->
+
+	<CombatExtended.AmmoSetDef>
+		<defName>AmmoSet_Astroflamer</defName>
+		<label>Astrofuel</label>
+		<ammoTypes>
+			<Ammo_Astroflamer>Bullet_Astroflamer</Ammo_Astroflamer>
+			<Ammo_Flamethrower_Napalm>Bullet_Flamethrower_Napalm</Ammo_Flamethrower_Napalm>
+			<Ammo_Flamethrower_Prometheum>Bullet_Flamethrower_Prometheum</Ammo_Flamethrower_Prometheum>
+			<Ammo_Flamethrower_Bioferrite MayRequire="Ludeon.Rimworld.Anomaly">Bullet_Flamethrower_Bioferrite</Ammo_Flamethrower_Bioferrite>
+		</ammoTypes>
+	</CombatExtended.AmmoSetDef>
+
+	<CombatExtended.AmmoSetDef>
+		<defName>AmmoSet_Astroflamer_Burst</defName>
+		<label>Astrofuel</label>
+		<ammoTypes>
+			<Ammo_Astroflamer>Bullet_Astroflamer_Burst</Ammo_Astroflamer>
+			<Ammo_Flamethrower_Napalm>Bullet_Incinerator_Burst_Napalm</Ammo_Flamethrower_Napalm>
+			<Ammo_Flamethrower_Prometheum>Bullet_Incinerator_Burst_Prometheum</Ammo_Flamethrower_Prometheum>
+			<Ammo_Flamethrower_Bioferrite MayRequire="Ludeon.Rimworld.Anomaly">Bullet_Incinerator_Burst_Bioferrite</Ammo_Flamethrower_Bioferrite>
+		</ammoTypes>
+	</CombatExtended.AmmoSetDef>
+
+	<!-- ==================== Ammo ========================== -->
+
+	<ThingDef Class="CombatExtended.AmmoDef" ParentName="FlamethrowerBase">
+		<defName>Ammo_Astroflamer</defName>
+		<label>jellied astrofuel</label>
+		<description>Fuel for astroflamer.</description>
+		<graphicData>
+			<texPath>ThirdParty/VanillaExpanded/Astrofuel</texPath>
+			<graphicClass>Graphic_StackCount</graphicClass>
+		</graphicData>
+		<ammoClass>Astrofuel</ammoClass>
+		<comps>
+			<li Class="CombatExtended.CompProperties_ExplosiveCE">
+				<damageAmountBase>5</damageAmountBase>
+				<explosiveDamageType>VGE_AstrofireDamage</explosiveDamageType>
+				<explosiveRadius>1.2</explosiveRadius>
+				<preExplosionSpawnThingDef>VGE_Filth_Astrofuel</preExplosionSpawnThingDef>
+				<preExplosionSpawnChance>1</preExplosionSpawnChance>
+			</li>
+		</comps>
+	</ThingDef>
+
+	<!-- ================== Projectiles ================== -->
+
+	<ThingDef Name="BaseAstroflamerBullet" ParentName="BaseExplosiveBullet">
+		<defName>Bullet_Astroflamer</defName>
+		<thingClass>CombatExtended.ProjectileCE_Explosive</thingClass>
+		<label>jellied astrofuel stream</label>
+		<graphicData>
+			<texPath>ThirdParty/VanillaExpanded/FireGlow_Astro</texPath>
+			<shaderType>MoteGlow</shaderType>
+			<graphicClass>Graphic_Single</graphicClass>
+		</graphicData>
+		<projectile Class="CombatExtended.ProjectilePropertiesCE">
+			<speed>20</speed>
+			<flyOverhead>false</flyOverhead>
+			<castShadow>false</castShadow>
+			<damageDef>VGE_AstrofireDamage</damageDef>
+			<damageAmountBase>5</damageAmountBase>
+			<preExplosionSpawnThingDef>VGE_Filth_Astrofuel</preExplosionSpawnThingDef>
+			<preExplosionSpawnChance>0.67</preExplosionSpawnChance>
+			<soundExplode>CE_FlamethrowerExplosion</soundExplode>
+			<explosionRadius>1.6</explosionRadius><!-- up from 1.2 -->
+			<ai_IsIncendiary>true</ai_IsIncendiary>
+			<screenShakeFactor>0</screenShakeFactor>
+		</projectile>
+		<comps>
+			<li Class="CombatExtended.CompProperties_ProjectileFleck">
+				<FleckDatas>
+					<li>
+						<fleck>Fleck_AstroflamerTrail</fleck>
+						<emissionsPerTick>2</emissionsPerTick>
+						<flecksPerEmission>2</flecksPerEmission>
+						<scale>1</scale>
+						<startDelayTick>2</startDelayTick>
+					</li>
+					<li>
+						<fleck>Fleck_CEFlamethrowerSmokeTrail</fleck>
+						<emissionsPerTick>2</emissionsPerTick>
+						<flecksPerEmission>1</flecksPerEmission>
+						<scale>1</scale>
+						<startDelayTick>2</startDelayTick>
+					</li>
+				</FleckDatas>
+			</li>
+		</comps>
+	</ThingDef>
+
+	<ThingDef ParentName="BaseAstroflamerBullet">
+		<defName>Bullet_Astroflamer_Burst</defName>
+		<thingClass>CombatExtended.ProjectileCE_Explosive</thingClass>
+		<label>astrofuel stream</label>
+		<projectile Class="CombatExtended.ProjectilePropertiesCE">
+			<pelletCount>20</pelletCount>
+			<damageDef>VGE_AstrofireDamage</damageDef>
+			<damageAmountBase>5</damageAmountBase>
+			<preExplosionSpawnThingDef>VGE_Filth_Astrofuel</preExplosionSpawnThingDef>
+			<preExplosionSpawnChance>0.67</preExplosionSpawnChance>
+			<soundExplode>CE_FlamethrowerExplosion</soundExplode>
+			<explosionRadius>1.6</explosionRadius><!-- up from 1.2 -->
+			<ai_IsIncendiary>true</ai_IsIncendiary>
+			<screenShakeFactor>0</screenShakeFactor>
+			<spreadMult>0.5</spreadMult>
+		</projectile>
+	</ThingDef>
+
+	<!-- ==================== Recipes ========================== -->
+
+	<RecipeDef ParentName="FlamethrowerAmmoRecipeBase">
+		<defName>MakeAmmo_Astroflamer</defName>
+		<label>make jellied astrofuel x100</label>
+		<description>Craft 100 units of jellied astrofuel.</description>
+		<jobString>Making jellied astrofuel.</jobString>
+		<ingredients>
+			<li>
+				<filter>
+					<thingDefs>
+						<li>Prometheum</li>
+					</thingDefs>
+				</filter>
+				<count>5</count>
+			</li>
+			<li>
+				<filter>
+					<thingDefs>
+						<li>VGE_Astrofuel</li>
+					</thingDefs>
+				</filter>
+				<count>10</count>
+			</li>
+		</ingredients>
+		<fixedIngredientFilter>
+			<thingDefs>
+				<li>Prometheum</li>
+				<li>VGE_Astrofuel</li>
+			</thingDefs>
+		</fixedIngredientFilter>
+		<products>
+			<Ammo_Astroflamer>100</Ammo_Astroflamer>
+		</products>
+	</RecipeDef>
+
+</Defs>

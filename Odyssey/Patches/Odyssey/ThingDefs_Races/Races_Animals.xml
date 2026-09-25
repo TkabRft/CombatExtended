@@ -1349,6 +1349,17 @@
 	</Operation>
 
 	<!-- === Badger === -->
+
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName="Badger"]
+		</xpath>
+		<value>
+			<li Class="CombatExtended.RacePropertiesExtensionCE">
+				<bodyShape>Quadruped</bodyShape>
+			</li>
+		</value>
+	</Operation>
+
 	<Operation Class="PatchOperationAdd">
 		<xpath>Defs/ThingDef[defName="Badger"]/statBases</xpath>
 		<value>
@@ -1859,7 +1870,7 @@
 
 	<!-- === Giant toad === -->
 	<Operation Class="PatchOperationAddModExtension">
-		<xpath>Defs/ThingDef[defName="Alligator"]</xpath>
+		<xpath>Defs/ThingDef[defName="ColossusToad"]</xpath>
 		<value>
 			<li Class="CombatExtended.RacePropertiesExtensionCE">
 				<bodyShape>Quadruped</bodyShape>

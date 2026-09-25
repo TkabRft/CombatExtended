@@ -140,7 +140,7 @@
 			</value>
 		</nomatch>
 		<match Class="PatchOperationAdd">
-			<xpath>Defs/BodyDef[defName="AM_DemolisherBody"]/corePart/parts/parts/li[def="AM_TankPlateThird"]/parts/li[def="AM_TankPlateFifth"]/groups</xpath>
+			<xpath>Defs/BodyDef[defName="AM_DemolisherBody"]/corePart/parts/li[def="AM_TankPlateThird"]/parts/li[def="AM_TankPlateFifth"]/groups</xpath>
 			<value>
 				<li>CoveredByNaturalArmor</li>
 			</value>

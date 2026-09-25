@@ -19,6 +19,13 @@
 				</li>
 
 				<li Class="PatchOperationAdd">
+					<xpath>Defs/ThingDef[defName="VRE_CompanionDryad"]/comps</xpath>
+					<value>
+						<li Class="CombatExtended.CompProperties_Inventory"/>
+					</value>
+				</li>
+
+				<li Class="PatchOperationAdd">
 					<xpath>Defs/ThingDef[defName="VRE_CompanionDryad"]/statBases</xpath>
 					<value>
 						<MeleeDodgeChance>0.20</MeleeDodgeChance>

@@ -89,6 +89,24 @@
 		</value>
 	</Operation>
 
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[defName="VFED_Turret_Kontarion"]/building</xpath>
+		<value>
+			<buildingTags>
+				<li>CE_Autoloader_UraniumSlug</li>
+			</buildingTags>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[defName="Turret_Sniper"]/building</xpath>
+		<value>
+			<buildingTags>
+				<li>CE_Autoloader_UraniumSlug</li>
+			</buildingTags>
+		</value>
+	</Operation>
+
 	<Operation Class="PatchOperationReplace">
 		<xpath>Defs/ThingDef[defName="VFED_Turret_Kontarion"]/costList</xpath>
 		<value>
@@ -176,6 +194,24 @@
 		</value>
 	</Operation>
 
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[defName="VFED_Turret_Palintone"]/building</xpath>
+		<value>
+			<buildingTags>
+				<li>CE_Autoloader_20x102mmNATO</li>
+			</buildingTags>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[defName="Turret_Autocannon"]/building</xpath>
+		<value>
+			<buildingTags>
+				<li>CE_Autoloader_20x102mmNATO</li>
+			</buildingTags>
+		</value>
+	</Operation>
+
 	<Operation Class="PatchOperationReplace">
 		<xpath>Defs/ThingDef[defName="VFED_Turret_Palintone"]/costList</xpath>
 		<value>
@@ -257,6 +293,24 @@
 		<xpath>Defs/ThingDef[defName="VFED_Turret_Onager"]/building/turretBurstCooldownTime</xpath>
 		<value>
 			<turretBurstCooldownTime>4.2</turretBurstCooldownTime>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[defName="VFED_Turret_Onager"]/building</xpath>
+		<value>
+			<buildingTags>
+				<li>CE_Autoloader_50mmRocket</li>
+			</buildingTags>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[defName="Turret_RocketswarmLauncher"]/building</xpath>
+		<value>
+			<buildingTags>
+				<li>CE_Autoloader_50mmRocket</li>
+			</buildingTags>
 		</value>
 	</Operation>
 

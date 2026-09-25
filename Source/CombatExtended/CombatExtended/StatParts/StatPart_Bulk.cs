@@ -32,7 +32,9 @@ public class StatPart_Bulk : StatPart
     {
         if (ValidReq(req))
         {
-            val *= MassBulkUtility.HitChanceBulkFactor(inv(req).currentBulk, inv(req).capacityBulk);
+            float multiplier = MassBulkUtility.HitChanceBulkFactor(inv(req).currentBulk, inv(req).capacityBulk);
+            //so that bulk doesn't increase hit chance when hit chance is negative (before post-processing)
+            val *= val > 0 ? multiplier : 1 + (1 - multiplier);
         }
     }
 }

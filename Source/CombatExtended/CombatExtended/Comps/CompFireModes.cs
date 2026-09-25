@@ -19,7 +19,7 @@ public class CompFireModes : CompRangedGizmoGiver
     private FireMode currentFireModeInt;
     private AimMode currentAimModeInt;
     private bool newComp = true;
-    public TargettingMode targetMode = TargettingMode.torso;
+    public TargettingMode targetMode = TargettingMode.automatic;
 
     #endregion
 
@@ -241,7 +241,7 @@ public class CompFireModes : CompRangedGizmoGiver
 
     public override IEnumerable<Gizmo> CompGetGizmosExtra()
     {
-        if (CasterPawn?.Faction == Faction.OfPlayer)
+        if (CasterPawn?.Faction == Faction.OfPlayer || DebugSettings.godMode)
         {
             foreach (Command com in GenerateGizmos())
             {

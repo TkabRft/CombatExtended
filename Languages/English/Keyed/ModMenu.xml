@@ -99,6 +99,9 @@
 	<CE_Settings_DetailedMeleeTooltip_Desc>Enables extra information about parry, dodge and other attack chance modifiers in melee tooltip.</CE_Settings_DetailedMeleeTooltip_Desc>
 	<CE_Settings_DetailedMeleeTooltip_Title>Show detailed melee tooltip</CE_Settings_DetailedMeleeTooltip_Title>
 
+	<CE_Settings_NonPlayerMeleeTooltip_Desc>Enables melee tooltip for all pawns, including wild animals, allies and raiders.</CE_Settings_NonPlayerMeleeTooltip_Desc>
+	<CE_Settings_NonPlayerMeleeTooltip_Title>Show melee tooltip for all pawns</CE_Settings_NonPlayerMeleeTooltip_Title>
+
 	<CE_Settings_FragmentsFromWalls_Desc>When enabled, damaging walls can generate fragments.</CE_Settings_FragmentsFromWalls_Desc>
 	<CE_Settings_FragmentsFromWalls_Title>Fragments from walls</CE_Settings_FragmentsFromWalls_Title>
 
@@ -119,6 +122,12 @@
 
 	<CE_Settings_SuppressionCausesRunning_Title>Suppressed pawns seek cover</CE_Settings_SuppressionCausesRunning_Title>
 	<CE_Settings_SuppressionCausesRunning_Desc>When enabled, pawns under light (yellow) suppression will interupt what they are doing to seek cover. Pawns under heavy (orange) suppression will still hunker.</CE_Settings_SuppressionCausesRunning_Desc>
+
+	<CE_Settings_RequireArtilleryMarkerForOffMapArtillery_Title>Require marker for off-map artillery</CE_Settings_RequireArtilleryMarkerForOffMapArtillery_Title>
+	<CE_Settings_RequireArtilleryMarkerForOffMapArtillery_Desc>When enabled, off-map artillery can only target artillery markers. Disable this to target unmarked cells with the full unspotted accuracy penalty.</CE_Settings_RequireArtilleryMarkerForOffMapArtillery_Desc>
+
+	<CE_Settings_RealWeaponNames_Title>Use real weapon names</CE_Settings_RealWeaponNames_Title>
+	<CE_Settings_RealWeaponNames_Desc>When enabled, base game weapons, as well as some official add-on content, will use their real life names.\n\nRequires a restart to apply.</CE_Settings_RealWeaponNames_Desc>
 
 
 	<!-- ========= Explosion Settings ========= -->
@@ -156,7 +165,13 @@
 	<CE_Settings_Vehicles>Vehicle settings</CE_Settings_Vehicles>
 
 	<CE_Settings_PatchArmorDamage_Title>Use New Vehicle Armor</CE_Settings_PatchArmorDamage_Title>
-	<CE_Settings_PatchArmorDamage_Desc>Vehicle Armor reduces damage based on relative values, but can be penetrated by high AP attacks..</CE_Settings_PatchArmorDamage_Desc>
+	<CE_Settings_PatchArmorDamage_Desc>Vehicle Armor reduces damage based on relative values, but can be penetrated by high AP attacks.</CE_Settings_PatchArmorDamage_Desc>
+
+	<CE_Settings_HitRandomVehicleComponents_Title>Hit any component</CE_Settings_HitRandomVehicleComponents_Title>
+	<CE_Settings_HitRandomVehicleComponents_Desc>When a vehicle is at low health, projectiles that fail to encounter a surviving component will instead damage a random one.\n\nThis prevents heavily damaged vehicles being kept intact by small, hard-to-hit components.</CE_Settings_HitRandomVehicleComponents_Desc>
+
+	<CE_Settings_FragmentsFromVehicles_Title>Fragments from vehicles</CE_Settings_FragmentsFromVehicles_Title>
+	<CE_Settings_FragmentsFromVehicles_Desc>When a projectile over-penetrates a vehicle, generate a fragments on the far side.</CE_Settings_FragmentsFromVehicles_Desc>
 
 	<!-- ========== Autopatcher settings ========== -->
 

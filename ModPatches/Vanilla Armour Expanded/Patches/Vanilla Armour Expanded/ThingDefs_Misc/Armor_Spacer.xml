@@ -229,15 +229,13 @@
 		</nomatch>
 	</Operation>
 
-	<Operation Class="PatchOperationReplace">
+	<Operation Class="PatchOperationAdd">
 		<xpath>Defs/ThingDef[defName="VAE_Headgear_HeavyMarineHelmet"]/equippedStatOffsets</xpath>
 		<value>
-			<equippedStatOffsets>
-				<AimingAccuracy>0.15</AimingAccuracy>
-				<ToxicEnvironmentResistance>0.5</ToxicEnvironmentResistance>
-				<SmokeSensitivity>-1</SmokeSensitivity>
-				<MeleeDodgeChance>-0.15</MeleeDodgeChance>
-			</equippedStatOffsets>
+			<AimingAccuracy>0.15</AimingAccuracy>
+			<ToxicEnvironmentResistance>0.5</ToxicEnvironmentResistance>
+			<SmokeSensitivity>-1</SmokeSensitivity>
+			<MeleeDodgeChance>-0.15</MeleeDodgeChance>
 		</value>
 	</Operation>
 
@@ -300,14 +298,12 @@
 	</Operation>
 
 	<Operation Class="PatchOperationReplace">
-		<xpath>Defs/ThingDef[defName="VAE_Apparel_HeavyMarineArmor"]/equippedStatOffsets</xpath>
+		<xpath>Defs/ThingDef[defName="VAE_Apparel_HeavyMarineArmor"]/equippedStatOffsets/MoveSpeed</xpath>
 		<value>
-			<equippedStatOffsets>
-				<CarryWeight>100</CarryWeight>
-				<CarryBulk>20</CarryBulk>
-				<ShootingAccuracyPawn>0.15</ShootingAccuracyPawn>
-				<ToxicEnvironmentResistance>0.5</ToxicEnvironmentResistance>
-			</equippedStatOffsets>
+			<CarryWeight>100</CarryWeight>
+			<CarryBulk>20</CarryBulk>
+			<ShootingAccuracyPawn>0.15</ShootingAccuracyPawn>
+			<ToxicEnvironmentResistance>0.5</ToxicEnvironmentResistance>
 		</value>
 	</Operation>
 
@@ -412,17 +408,13 @@
 				</nomatch>
 			</li>
 
-			<li Class="PatchOperationReplace">
+			<li Class="PatchOperationAdd">
 				<xpath>Defs/ThingDef[defName="VAE_Headgear_RoyalSiegeHelmet"]/equippedStatOffsets</xpath>
 				<value>
-					<equippedStatOffsets>
-						<AimingAccuracy>0.15</AimingAccuracy>
-						<ToxicEnvironmentResistance>0.5</ToxicEnvironmentResistance>
-						<SmokeSensitivity>-1</SmokeSensitivity>
-						<PsychicSensitivity>0.05</PsychicSensitivity>
-						<PsychicEntropyRecoveryRate>0.033</PsychicEntropyRecoveryRate>
-						<MeleeDodgeChance>-0.15</MeleeDodgeChance>
-					</equippedStatOffsets>
+					<AimingAccuracy>0.15</AimingAccuracy>
+					<ToxicEnvironmentResistance>0.5</ToxicEnvironmentResistance>
+					<SmokeSensitivity>-1</SmokeSensitivity>
+					<MeleeDodgeChance>-0.15</MeleeDodgeChance>
 				</value>
 			</li>
 
@@ -440,16 +432,12 @@
 			</li>
 
 			<li Class="PatchOperationReplace">
-				<xpath>Defs/ThingDef[defName="VAE_Apparel_RoyalSiegeArmor"]/equippedStatOffsets</xpath>
+				<xpath>Defs/ThingDef[defName="VAE_Apparel_RoyalSiegeArmor"]/equippedStatOffsets/MoveSpeed</xpath>
 				<value>
-					<equippedStatOffsets>
-						<CarryWeight>100</CarryWeight>
-						<CarryBulk>20</CarryBulk>
-						<ShootingAccuracyPawn>0.15</ShootingAccuracyPawn>
-						<ToxicEnvironmentResistance>0.5</ToxicEnvironmentResistance>
-						<PsychicSensitivity>0.05</PsychicSensitivity>
-						<PsychicEntropyRecoveryRate>0.033</PsychicEntropyRecoveryRate>
-					</equippedStatOffsets>
+					<CarryWeight>100</CarryWeight>
+					<CarryBulk>20</CarryBulk>
+					<ShootingAccuracyPawn>0.15</ShootingAccuracyPawn>
+					<ToxicEnvironmentResistance>0.5</ToxicEnvironmentResistance>
 				</value>
 			</li>
 

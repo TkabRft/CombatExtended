@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+	<!-- Maa'drhn Leather -->
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="ERN_MaadrhnLeather"]/statBases/StuffPower_Armor_Sharp</xpath>
+		<value>
+			<StuffPower_Armor_Sharp>0.05</StuffPower_Armor_Sharp>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="ERN_MaadrhnLeather"]/statBases/StuffPower_Armor_Blunt</xpath>
+		<value>
+			<StuffPower_Armor_Blunt>0.05</StuffPower_Armor_Blunt>
+		</value>
+	</Operation>
+
+</Patch>

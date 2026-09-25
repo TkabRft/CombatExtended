@@ -69,7 +69,8 @@ public class Harmony_TooltipUtility_ShotCalculationTipString_Patch
                 }
             }
             // melee tooltip
-            else if (pawn != null && pawn2 != null && pawn != pawn2 && (pawn.Drafted || pawn.Faction != Faction.OfPlayer || pawn.InAggroMentalState))
+            else if (pawn != null && pawn2 != null && pawn != pawn2
+                     && ((pawn.IsColonist && (pawn.Drafted || pawn.InAggroMentalState)) || (!pawn.IsColonist && (pawn.Faction == Faction.OfPlayer || Controller.settings.NonPlayerMeleeTooltip))))
             {
                 //if pawn doesn't have a melee weapon equipped, find another source of melee verb
                 if (meleeVerbCE == null)

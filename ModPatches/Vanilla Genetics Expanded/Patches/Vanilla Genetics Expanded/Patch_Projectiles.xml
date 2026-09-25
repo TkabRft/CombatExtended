@@ -82,6 +82,8 @@
 				<damageAmountBase>13</damageAmountBase>
 				<speed>300</speed>
 				<ai_IsIncendiary>true</ai_IsIncendiary>
+				<armorPenetrationSharp>14</armorPenetrationSharp>
+				<armorPenetrationBlunt>0</armorPenetrationBlunt>
 			</projectile>
 		</value>
 	</Operation>

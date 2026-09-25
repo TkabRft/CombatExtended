@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Patch>
+
 	<Operation Class="PatchOperationAdd">
 		<xpath>Defs/ThingDef[@Name="AA_MeatMealBase"]/statBases</xpath>
 		<value>
@@ -36,65 +37,53 @@
 		<nomatch Class="PatchOperationAdd">
 			<xpath>Defs/ThingDef[defName="GU_RedWood"]</xpath>
 			<value>
-				<equippedStatOffsets>
-					<MeleeCritChance>0.2</MeleeCritChance>
-					<MeleeParryChance>1</MeleeParryChance>
-					<MeleeDodgeChance>0.13</MeleeDodgeChance>
-				</equippedStatOffsets>
+				<equippedStatOffsets />
 			</value>
 		</nomatch>
-		<match Class="PatchOperationReplace">
+	</Operation>
+
+	<Operation Class="PatchOperationConditional">
+		<xpath>Defs/ThingDef[defName="GU_RedWood"]/equippedStatOffsets/MeleeParryChance</xpath>
+		<nomatch Class="PatchOperationAdd">
 			<xpath>Defs/ThingDef[defName="GU_RedWood"]/equippedStatOffsets</xpath>
 			<value>
-				<equippedStatOffsets>
-					<MeleeCritChance>0.2</MeleeCritChance>
-					<MeleeParryChance>1</MeleeParryChance>
-					<MeleeDodgeChance>0.13</MeleeDodgeChance>
-				</equippedStatOffsets>
+				<MeleeCritChance>0.2</MeleeCritChance>
+				<MeleeParryChance>1</MeleeParryChance>
+				<MeleeDodgeChance>0.13</MeleeDodgeChance>
 			</value>
-		</match>
+		</nomatch>
 	</Operation>
 
 	<Operation Class="PatchOperationConditional">
 		<xpath>Defs/ThingDef[defName="GU_RedWood"]/statBases/Bulk</xpath>
-		<nomatch Class="PatchOperationReplace">
+		<nomatch Class="PatchOperationAdd">
 			<xpath>Defs/ThingDef[defName="GU_RedWood"]/statBases</xpath>
 			<value>
-				<statBases>
-					<Bulk>0.07</Bulk>
-					<MeleeCounterParryBonus>1.33</MeleeCounterParryBonus>
-					<StuffPower_Armor_Sharp>0.1</StuffPower_Armor_Sharp>
-					<StuffPower_Armor_Blunt>0.2</StuffPower_Armor_Blunt>
-					<StuffPower_Armor_Heat>0.025</StuffPower_Armor_Heat>
-					<MarketValue>1.2</MarketValue>
-					<MaxHitPoints>150</MaxHitPoints>
-					<Mass>0.4</Mass>
-					<Flammability>0.6</Flammability>
-					<DeteriorationRate>1</DeteriorationRate>
-					<SharpDamageMultiplier>0.7</SharpDamageMultiplier>
-					<BluntDamageMultiplier>0.5</BluntDamageMultiplier>
-				</statBases>
+				<Bulk>0.07</Bulk>
+				<MeleeCounterParryBonus>1.33</MeleeCounterParryBonus>
 			</value>
 		</nomatch>
-		<match Class="PatchOperationReplace">
-			<xpath>Defs/ThingDef[defName="GU_RedWood"]/statBases</xpath>
-			<value>
-				<statBases>
-					<Bulk>0.07</Bulk>
-					<MeleeCounterParryBonus>1.33</MeleeCounterParryBonus>
-					<StuffPower_Armor_Sharp>0.1</StuffPower_Armor_Sharp>
-					<StuffPower_Armor_Blunt>0.2</StuffPower_Armor_Blunt>
-					<StuffPower_Armor_Heat>0.025</StuffPower_Armor_Heat>
-					<MarketValue>1.2</MarketValue>
-					<MaxHitPoints>150</MaxHitPoints>
-					<Mass>0.4</Mass>
-					<Flammability>0.6</Flammability>
-					<DeteriorationRate>1</DeteriorationRate>
-					<SharpDamageMultiplier>0.7</SharpDamageMultiplier>
-					<BluntDamageMultiplier>0.5</BluntDamageMultiplier>
-				</statBases>
-			</value>
-		</match>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="GU_RedWood"]/statBases/StuffPower_Armor_Sharp</xpath>
+		<value>
+			<StuffPower_Armor_Sharp>0.1</StuffPower_Armor_Sharp>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="GU_RedWood"]/statBases/StuffPower_Armor_Blunt</xpath>
+		<value>
+			<StuffPower_Armor_Blunt>0.2</StuffPower_Armor_Blunt>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="GU_RedWood"]/statBases/StuffPower_Armor_Heat</xpath>
+		<value>
+			<StuffPower_Armor_Heat>0.025</StuffPower_Armor_Heat>
+		</value>
 	</Operation>
 
 	<Operation Class="PatchOperationConditional">
@@ -106,12 +95,6 @@
 				<MeleePenetrationFactor>0.3</MeleePenetrationFactor>
 			</value>
 		</nomatch>
-		<match Class="PatchOperationReplace">
-			<xpath>Defs/ThingDef[defName="GU_RedWood"]/stuffProps/Mass</xpath>
-			<value>
-				<Mass>0.3</Mass>
-			</value>
-		</match>
 	</Operation>
 
 	<Operation Class="PatchOperationAddModExtension">
@@ -122,4 +105,5 @@
 			</li>
 		</value>
 	</Operation>
+
 </Patch>

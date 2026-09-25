@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Patch>
+
+	<Operation Class="CombatExtended.PatchOperationSettingsConditional">
+		<settingName>realWeaponNames</settingName>
+		<match Class="PatchOperationReplace">
+			<xpath>Defs/ThingDef[defName="VWE_Gun_PDW"]/label</xpath>
+			<value>
+				<label>P90</label>
+			</value>
+		</match>
+	</Operation>
+
+	<Operation Class="CombatExtended.PatchOperationSettingsConditional">
+		<settingName>realWeaponNames</settingName>
+		<match Class="PatchOperationReplace">
+			<xpath>Defs/ThingDef[defName="VWE_Gun_BullpupRifle"]/label</xpath>
+			<value>
+				<label>FAMAS</label>
+			</value>
+		</match>
+	</Operation>
+
+	<Operation Class="CombatExtended.PatchOperationSettingsConditional">
+		<settingName>realWeaponNames</settingName>
+		<match Class="PatchOperationReplace">
+			<xpath>Defs/ThingDef[defName="VWE_Gun_AutomaticPistol"]/label</xpath>
+			<value>
+				<label>Glock 18</label>
+			</value>
+		</match>
+	</Operation>
+	
+</Patch>

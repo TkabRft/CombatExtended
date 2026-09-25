@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+	<!-- ========== Astrofire ========== -->
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/DamageDef[defName="VGE_AstrofireDamage"]</xpath>
+		<value>
+			<li Class="CombatExtended.DamageDefExtensionCE">
+				<harmOnlyOutsideLayers>true</harmOnlyOutsideLayers>
+				<isAmbientDamage>true</isAmbientDamage>
+				<canCauseWallFragmentation>false</canCauseWallFragmentation>
+			</li>
+		</value>
+	</Operation>
+
+</Patch>

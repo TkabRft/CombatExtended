@@ -11,8 +11,21 @@
 		<mods>
 			<li>Vanilla Furniture Expanded - Security</li>
 		</mods>
-		<match Class="PatchOperationRemove">
-			<xpath>Defs/ThingDef[defName="VFES_Turret_AutocannonDouble"]/comps/li[@Class="VFED.CompProperties_BoxRefuel"]</xpath>
+		<match Class="PatchOperationSequence">
+			<operations>
+				<li Class="PatchOperationRemove">
+					<xpath>Defs/ThingDef[defName="VFES_Turret_AutocannonDouble"]/comps/li[@Class="VFED.CompProperties_BoxRefuel"]</xpath>
+				</li>
+
+				<li Class="PatchOperationAdd">
+					<xpath>Defs/ThingDef[defName="VFES_Turret_AutocannonDouble"]/building</xpath>
+					<value>
+						<buildingTags>
+							<li>CE_Autoloader_20x102mmNATO</li>
+						</buildingTags>
+					</value>
+				</li>
+			</operations>
 		</match>
 	</Operation>
 

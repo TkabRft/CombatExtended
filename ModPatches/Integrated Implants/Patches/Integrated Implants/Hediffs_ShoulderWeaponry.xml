@@ -25,11 +25,11 @@
 
 	<!-- Shoulder Charge Turret -->
 	<Operation Class="PatchOperationReplace">
-		<xpath>Defs/HediffDef[defName="LTS_ShoulderChargeTurretActive"]/comps/li[@Class="MVCF.Comps.HediffCompProperties_ExtendedVerbGiver"]/verbs</xpath>
+		<xpath>Defs/HediffDef[defName="LTS_ShoulderTurretActive"]/comps/li[@Class="MVCF.Comps.HediffCompProperties_ExtendedVerbGiver"]/verbs</xpath>
 		<value>
 			<verbs>
 				<li Class="CombatExtended.VerbPropertiesCE">
-					<label>shoulder turret charge gun</label>
+					<label>shoulder turret gun</label>
 					<verbClass>CombatExtended.Verb_ShootCE</verbClass>
 					<hasStandardCommand>true</hasStandardCommand>
 					<defaultProjectile>Bullet_556x45mmNATO_FMJ_SB</defaultProjectile>
@@ -61,8 +61,9 @@
 		</value>
 	</Operation>
 
-	<Operation Class="CombatExtended.PatchOperation_ConditionalGeneric">
-		<standard Class="PatchOperationReplace">
+	<Operation Class="CombatExtended.PatchOperationSettingsConditional">
+		<settingName>genericAmmo</settingName>
+		<nomatch Class="PatchOperationReplace">
 		<xpath>Defs/AbilityDef[defName="LTS_ShoulderMortar"]/comps/li[@Class="LTS_Implants.LTS_CompProperties_AbilityReloadable"]</xpath>
 			<value>
 			<li Class="LTS_Implants.LTS_CompProperties_AbilityReloadable">
@@ -72,8 +73,8 @@
 				<soundReload>Standard_Reload</soundReload>
 			</li>
 			</value>
-		</standard>
-		<generic Class="PatchOperationReplace">
+		</nomatch>
+		<match Class="PatchOperationReplace">
 		<xpath>Defs/AbilityDef[defName="LTS_ShoulderMortar"]/comps/li[@Class="LTS_Implants.LTS_CompProperties_AbilityReloadable"]</xpath>
 			<value>
 			<li Class="LTS_Implants.LTS_CompProperties_AbilityReloadable">
@@ -83,7 +84,7 @@
 				<soundReload>Standard_Reload</soundReload>
 			</li>
 			</value>
-		</generic>
+		</match>
 	</Operation>
 
 	<Operation Class="PatchOperationReplace">

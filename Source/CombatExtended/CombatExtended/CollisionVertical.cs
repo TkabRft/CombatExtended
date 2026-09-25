@@ -49,6 +49,13 @@ public struct CollisionVertical
 
         if (thing is Building)
         {
+            // Submerged things (e.g. concealed/floor turrets) report no height
+            // Check in supplied by compat modules via Patches.IsSubmerged.
+            if (Patches.IsSubmerged(thing))
+            {
+                return;     // leaves heightRange = (0,0) & shotHeight = 0
+            }
+
             if (thing is Building_Door door && door.Open)
             {
                 return;     //returns heightRange = (0,0) & shotHeight = 0. If not open, doors have FillCategory.Full so returns (0, WallCollisionHeight)
@@ -73,7 +80,7 @@ public struct CollisionVertical
         }
         float collisionHeight = 0f;
         float shotHeightOffset = 0;
-        float heightAdjust = CETrenches.GetHeightAdjust(thing.Position, thing.Map);
+        float heightAdjust = 0;
 
         var pawn = thing as Pawn;
         if (pawn != null)
@@ -84,7 +91,7 @@ public struct CollisionVertical
 
             if (pawn.Flying)
             {
-                heightAdjust += 0.5f * pawn.flight.PositionOffsetFactor;
+                heightAdjust += 1;
             }
 
             // Humanlikes in combat crouch to reduce their profile

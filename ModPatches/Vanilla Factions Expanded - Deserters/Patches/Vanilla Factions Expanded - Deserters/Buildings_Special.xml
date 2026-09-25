@@ -15,10 +15,36 @@
 		<xpath>Defs/ThingDef[defName="VFED_AmmoBox_UraniumSlug"]</xpath>
 		<value>
 			<comps>
-				<li Class="CombatExtended.CompProperties_AmmoUser">
+				<li Class="CombatExtended.CompProperties_AmmoListUser">
 					<magazineSize>180</magazineSize>
 					<reloadTime>7.8</reloadTime>
 					<ammoSet>AmmoSet_40x311mmR</ammoSet>
+					<ammoSpawnOptions>
+						<li>
+							<ammoDef>Ammo_40x311mmR_AP</ammoDef>
+							<percentRange>0.75~1</percentRange>
+							<weight>1</weight>
+						</li>
+						<li>
+							<ammoDef>Ammo_40x311mmR_Incendiary</ammoDef>
+							<percentRange>0.75~1</percentRange>
+							<weight>0.65</weight>
+						</li>
+						<li>
+							<ammoDef>Ammo_40x311mmR_HE</ammoDef>
+							<percentRange>0.75~1</percentRange>
+							<weight>0.65</weight>
+						</li>
+						<li>
+							<ammoDef>Ammo_40x311mmR_Sabot</ammoDef>
+							<percentRange>0.75~1</percentRange>
+							<weight>0.65</weight>
+						</li>
+					</ammoSpawnOptions>
+				</li>
+				<li Class="CompProperties_Power">
+					<compClass>CompPowerTrader</compClass>
+					<basePowerConsumption>50</basePowerConsumption>
 				</li>
 			</comps>
 		</value>
@@ -42,6 +68,9 @@
 					<li>Turret_Sniper</li>
 					<li>VFED_Turret_Kontarion</li>
 				</allowedTurrets>
+				<allowedTurretTags>
+					<li>CE_Autoloader_UraniumSlug</li>
+				</allowedTurretTags>
 			</li>
 		</value>
 	</Operation>
@@ -50,10 +79,36 @@
 	<Operation Class="PatchOperationAdd">
 		<xpath>Defs/ThingDef[defName="VFED_AmmoBox_Autocannon"]/comps</xpath>
 		<value>
-			<li Class="CombatExtended.CompProperties_AmmoUser">
+			<li Class="CombatExtended.CompProperties_AmmoListUser">
 				<magazineSize>600</magazineSize>
 				<reloadTime>7.8</reloadTime>
 				<ammoSet>AmmoSet_20x102mmNATO</ammoSet>
+				<ammoSpawnOptions>
+						<li>
+							<ammoDef>Ammo_20x102mmNATO_AP</ammoDef>
+							<percentRange>0.75~1</percentRange>
+							<weight>1</weight>
+						</li>
+						<li>
+							<ammoDef>Ammo_20x102mmNATO_HE</ammoDef>
+							<percentRange>0.75~1</percentRange>
+							<weight>0.65</weight>
+						</li>
+						<li>
+							<ammoDef>Ammo_20x102mmNATO_Incendiary</ammoDef>
+							<percentRange>0.75~1</percentRange>
+							<weight>0.65</weight>
+						</li>
+						<li>
+							<ammoDef>Ammo_20x102mmNATO_Sabot</ammoDef>
+							<percentRange>0.75~1</percentRange>
+							<weight>0.65</weight>
+						</li>
+				</ammoSpawnOptions>
+			</li>
+			<li Class="CompProperties_Power">
+				<compClass>CompPowerTrader</compClass>
+				<basePowerConsumption>50</basePowerConsumption>
 			</li>
 		</value>
 	</Operation>
@@ -77,6 +132,9 @@
 					<li>VFED_Turret_Palintone</li>
 					<li MayRequire="vanillaexpanded.vfesecurity">VFES_Turret_AutocannonDouble</li>
 				</allowedTurrets>
+				<allowedTurretTags>
+					<li>CE_Autoloader_20x102mmNATO</li>
+				</allowedTurretTags>
 			</li>
 		</value>
 	</Operation>
@@ -85,10 +143,20 @@
 	<Operation Class="PatchOperationAdd">
 		<xpath>Defs/ThingDef[defName="VFED_AmmoBox_Missile"]/comps</xpath>
 		<value>
-			<li Class="CombatExtended.CompProperties_AmmoUser">
+			<li Class="CombatExtended.CompProperties_AmmoListUser">
 				<magazineSize>72</magazineSize>
 				<reloadTime>7.8</reloadTime>
 				<ammoSet>AmmoSet_50mmRocket</ammoSet>
+				<ammoSpawnOptions>
+					<li>
+						<ammoDef>Ammo_50mmRocket_HE</ammoDef>
+						<percentRange>0.75~1</percentRange>
+					</li>
+				</ammoSpawnOptions>
+			</li>
+			<li Class="CompProperties_Power">
+				<compClass>CompPowerTrader</compClass>
+				<basePowerConsumption>50</basePowerConsumption>
 			</li>
 		</value>
 	</Operation>
@@ -111,6 +179,9 @@
 					<li>Turret_RocketswarmLauncher</li>
 					<li>VFED_Turret_Onager</li>
 				</allowedTurrets>
+				<allowedTurretTags>
+					<li>CE_Autoloader_50mmRocket</li>
+				</allowedTurretTags>
 			</li>
 		</value>
 	</Operation>

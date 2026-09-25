@@ -20,7 +20,8 @@ namespace CombatExtended;
  */
 public static class AmmoInjector
 {
-
+    private static readonly Dictionary<string, HashSet<ThingDef>> BenchesByTag = new Dictionary<string, HashSet<ThingDef>>();
+    private static bool _cacheBuilt;
     public const string destroyWithAmmoDisabledTag = "CE_AmmoInjector";               // The trade tag which automatically deleted this ammo with the ammo system disabled
     private const string enableTradeTag = "CE_AutoEnableTrade";             // The trade tag which designates ammo defs for being automatically switched to Tradeability.Stockable
     private const string enableCraftingTag = "CE_AutoEnableCrafting";        // The trade tag which designates ammo defs for having their crafting recipes automatically added to the crafting table
@@ -55,6 +56,7 @@ public static class AmmoInjector
     public static bool InjectAmmos()
     {
         bool enabled = Controller.settings.EnableAmmoSystem;
+        BuildBenchCache();
 
         // Initialize list of all weapons
         CE_Utility.allWeaponDefs.Clear();
@@ -107,8 +109,14 @@ public static class AmmoInjector
         */
 
         // Loop through all weaponDef's unique ammoType.ammo values
+        List<string> tradingTags = [];
+        List<string> craftingTags = [];
+        List<string> extraCraftingOptions = [];
         foreach (AmmoDef ammoDef in ammoDefs)
         {
+            tradingTags.Clear();
+            craftingTags.Clear();
+            extraCraftingOptions.Clear();
             //AFTER CE_Utility.allWeaponDefs is initiated, this sets each ammo to list its users & special effects in its DEF DESCRIPTION rather than its THING DESCRIPTION.
             //This is because the THING description ISN'T available during crafting - so people can now figure out what's different between ammo types.
             ammoDef.AddDescriptionParts();
@@ -116,175 +124,157 @@ public static class AmmoInjector
             // mortar ammo will always be enabled, even if the ammo system is turned off
             bool ammoEnabled = enabled || ammoDef.isMortarAmmo;
 
-            if (ammoDef.tradeTags != null)
+            if (ammoDef.tradeTags == null)
             {
-                if (ammoDef.tradeTags.Contains(destroyWithAmmoDisabledTag))
-                {
-                    // Toggle ammo visibility in the debug menu
-                    ammoDef.menuHidden = !ammoEnabled;
-                    ammoDef.destroyOnDrop = !ammoEnabled;
-                }
+                continue;
+            }
+            if (ammoDef.tradeTags.Contains(destroyWithAmmoDisabledTag))
+            {
+                // Toggle ammo visibility in the debug menu
+                ammoDef.menuHidden = !ammoEnabled;
+                ammoDef.destroyOnDrop = !ammoEnabled;
+            }
 
-                //Weapon defs aren't changed w.r.t crafting, trading, destruction on drop -- but the description is still added to the recipe
-                if (ammoDef.IsWeapon)
+            //Weapon defs aren't changed w.r.t crafting, trading, destruction on drop -- but the description is still added to the recipe
+            if (ammoDef.IsWeapon)
+            {
+                continue;
+            }
+
+            // Toggle trading
+            foreach (string tag in ammoDef.tradeTags)
+            {
+                if (BenchesByTag.ContainsKey(tag))
+                {
+                    extraCraftingOptions.Add(tag);
+                }
+                if (tag.StartsWith(enableCraftingTag))
+                {
+                    craftingTags.Add(tag);
+                }
+                if (tag.StartsWith(enableTradeTag))
+                {
+                    tradingTags.Add(tag);
+                }
+            }
+            if (tradingTags.Count > 0)
+            {
+                var curTag = tradingTags.First();
+
+                if (curTag == enableTradeTag)
+                {
+                    ammoDef.tradeability = ammoEnabled ? Tradeability.All : Tradeability.None;
+                }
+                else
+                {
+                    if (curTag.Length <= enableTradeTag.Length + 1)
+                    {
+                        Log.Error("Combat Extended :: AmmoInjector trying to inject " + ammoDef.ToString() + " but " + curTag + " is not a valid trading tag, valid formats are: " + enableTradeTag + " and " + enableTradeTag + "_levelOfTradeability");
+                    }
+                    else
+                    {
+                        var tradeabilityName = curTag.Remove(0, enableTradeTag.Length + 1);
+
+                        ammoDef.tradeability = ammoEnabled
+                                ? (Tradeability)Enum.Parse(typeof(Tradeability), tradeabilityName, true)
+                                : Tradeability.None;
+                    }
+                }
+            }
+
+            // Toggle craftability
+            if (craftingTags.Count <= 0 && extraCraftingOptions.Count <= 0)
+            {
+                continue;
+            }
+            RecipeDef recipe = DefDatabase<RecipeDef>.GetNamed(("Make" + ammoDef.defName), false);
+            if (recipe == null)
+            {
+                Log.Error("CE ammo injector found no recipe named Make" + ammoDef.defName);
+                continue;
+            }
+            foreach (string curTag in extraCraftingOptions)
+            {
+                if (!BenchesByTag.TryGetValue(curTag, out HashSet<ThingDef> benchHashSet))
                 {
                     continue;
                 }
-
-                //  LX7: Commented this out for now as it's preventing mechanoid ammo from being sold.
-                //  If this is needed for something that can't be accomplished via XML, update it with mech ammo sellability in mind.
-                //if (!ammoDef.Users                                                                          //If there exists NO gun..
-                //    .Any(x => !x.destroyOnDrop                                                              //.. which DOESN'T destroy on drop (e.g all guns destroy on drop)
-                //                || (x.weaponTags != null && x.weaponTags.Contains("TurretGun")              //.. or IS part of a Turret..
-                //                    && DefDatabase<ThingDef>.AllDefs.Where(y => y.building?.turretGunDef == x)                //.. as long as ALL turrets using the gun are non-mechcluster turrets
-                //                        .All(y => !y.building?.buildingTags?.Contains(MechClusterGenerator.MechClusterMemberTag) ?? true))))
-                //    continue;                                                                               //Then this ammo's tradeability and craftability are ignored
-
-                // Toggle trading
-                var tradingTags = ammoDef.tradeTags.Where(t => t.StartsWith(enableTradeTag));
-                if (tradingTags.Any())
+                foreach (ThingDef optionBench in benchHashSet)
                 {
-                    var curTag = tradingTags.First();
-
-                    if (curTag == enableTradeTag)
-                    {
-                        ammoDef.tradeability = ammoEnabled ? Tradeability.All : Tradeability.None;
-                    }
-                    else
-                    {
-                        if (curTag.Length <= enableTradeTag.Length + 1)
-                        {
-                            Log.Error("Combat Extended :: AmmoInjector trying to inject " + ammoDef.ToString() + " but " + curTag + " is not a valid trading tag, valid formats are: " + enableTradeTag + " and " + enableTradeTag + "_levelOfTradeability");
-                        }
-                        else
-                        {
-                            var tradeabilityName = curTag.Remove(0, enableTradeTag.Length + 1);
-
-                            ammoDef.tradeability = ammoEnabled
-                                                   ? (Tradeability)Enum.Parse(typeof(Tradeability), tradeabilityName, true)
-                                                   : Tradeability.None;
-                        }
-                    }
-                }
-
-                // Toggle craftability
-                var craftingTags = ammoDef.tradeTags.Where(t => t.StartsWith(enableCraftingTag));
-                if (craftingTags.Any())
-                {
-                    RecipeDef recipe = DefDatabase<RecipeDef>.GetNamed(("Make" + ammoDef.defName), false);
-                    if (recipe == null)
-                    {
-                        Log.Error("CE ammo injector found no recipe named Make" + ammoDef.defName);
-                    }
-                    else
-                    {
-                        // Go through all crafting tags and add to the appropriate benches
-                        foreach (string curTag in craftingTags)
-                        {
-                            ThingDef bench;
-                            ThingDef benchVFE = null;
-                            if (curTag == enableCraftingTag)
-                            {
-                                bench = CE_ThingDefOf.AmmoBench;
-                            }
-                            else
-                            {
-                                // Parse tag for bench def
-                                if (curTag.Length <= enableCraftingTag.Length + 1)
-                                {
-                                    Log.Error("Combat Extended :: AmmoInjector trying to inject " + ammoDef.ToString() + " but " + curTag + " is not a valid crafting tag, valid formats are: " + enableCraftingTag + " and " + enableCraftingTag + "_defNameOfCraftingBench");
-                                    continue;
-                                }
-                                var benchName = curTag.Remove(0, enableCraftingTag.Length + 1);
-                                bench = DefDatabase<ThingDef>.GetNamed(benchName, false);
-                                if (bench == null)
-                                {
-                                    Log.Error("Combat Extended :: AmmoInjector trying to inject " + ammoDef.ToString() + " but no crafting bench with defName=" + benchName + " could be found for tag " + curTag);
-                                    continue;
-                                }
-                                if (ModLister.HasActiveModWithName("Vanilla Furniture Expanded - Production"))
-                                {
-                                    string benchNameVFE = null;
-                                    if (curTag == "CE_AutoEnableCrafting_ElectricSmithy" || curTag == "CE_AutoEnableCrafting_FueledSmithy")
-                                    {
-                                        benchNameVFE = "VFE_TableSmithyLarge";
-                                    }
-                                    if (curTag == "CE_AutoEnableCrafting_DrugLab")
-                                    {
-                                        benchNameVFE = "VFE_TableDrugLabElectric";
-                                    }
-                                    if (curTag == "CE_AutoEnableCrafting_TableMachining")
-                                    {
-                                        benchNameVFE = "VFE_TableMachiningLarge";
-                                    }
-                                    if (benchNameVFE != null)
-                                    {
-                                        benchVFE = DefDatabase<ThingDef>.GetNamed(benchNameVFE, false);
-                                        if (benchVFE == null)
-                                        {
-                                            Log.Error("Combat Extended :: AmmoInjector trying to inject " + ammoDef.ToString() + " but no VFE crafting bench with defName=" + benchNameVFE + " could be found for tag " + curTag);
-                                            continue;
-                                        }
-                                    }
-                                }
-                            }
-                            ToggleRecipeOnBench(recipe, bench, ammoEnabled);
-                            if (benchVFE != null)
-                            {
-                                ToggleRecipeOnBench(recipe, benchVFE, ammoEnabled);
-                            }
-                            /*
-                            // Toggle recipe
-                            if (enabled)
-                            {
-                                recipe.recipeUsers.Add(bench);
-                            }
-                            else
-                            {
-                                recipe.recipeUsers.RemoveAll(x => x.defName == bench.defName);
-                            }
-                            */
-                        }
-                    }
+                    ToggleRecipeOnBench(recipe, optionBench, ammoEnabled);
                 }
             }
-        }
-
-        /*
-        if (canCraft)
-        {
-            // Set ammoCraftingStation.AllRecipes to null so it will reset
-            _allRecipesCached.SetValue(AmmoCraftingStation, null);
-
-            // Remove all bills which contain removed ammo types
-            if (!enabled)
+            // Go through all crafting tags and add to the appropriate benches
+            foreach (string curTag in craftingTags)
             {
-                if (Current.Game != null)
+                ThingDef bench;
+                if (curTag == enableCraftingTag)
                 {
-                    IEnumerable<Building> enumerable = Find.Maps.SelectMany(x => x.listerBuildings.AllBuildingsColonistOfDef(AmmoCraftingStation));
-                    foreach (Building current in enumerable)
+                    bench = CE_ThingDefOf.AmmoBench;
+                }
+                else
+                {
+                    // Parse tag for bench def
+                    if (curTag.Length <= enableCraftingTag.Length + 1)
                     {
-                        var billGiver = current as IBillGiver;
-                        if (billGiver != null)
-                        {
-                            for (int i = 0; i < billGiver.BillStack.Count; i++)
-                            {
-                                Bill bill = billGiver.BillStack[i];
-                                if (!AmmoCraftingStation.AllRecipes.Exists(r => bill.recipe == r))
-                                {
-                                    billGiver.BillStack.Delete(bill);
-                                }
-                            }
-                        }
+                        Log.Error("Combat Extended :: AmmoInjector trying to inject " + ammoDef.ToString() + " but " + curTag + " is not a valid crafting tag, valid formats are: " + enableCraftingTag + " and " + enableCraftingTag + "_defNameOfCraftingBench");
+                        continue;
+                    }
+                    var benchName = curTag.Remove(0, enableCraftingTag.Length + 1);
+                    bench = DefDatabase<ThingDef>.GetNamed(benchName, false);
+                    if (bench == null)
+                    {
+                        Log.Error("Combat Extended :: AmmoInjector trying to inject " + ammoDef.ToString() + " but no crafting bench with defName=" + benchName + " could be found for tag " + curTag);
+                        continue;
                     }
                 }
-
-                CE_Utility.allWeaponDefs.Clear();
+                ToggleRecipeOnBench(recipe, bench, ammoEnabled);
             }
         }
-        */
-
         return true;
+    }
+
+    private static void BuildBenchCache()
+    {
+        if (_cacheBuilt)
+        {
+            return;
+        }
+        List<AmmoInjectorOptions> ammoInjectorOptionList = DefDatabase<AmmoInjectorOptions>.AllDefsListForReading;
+        foreach (AmmoInjectorOptions opts in ammoInjectorOptionList)
+        {
+            if (opts?.benchesByTag == null)
+            {
+                continue;
+            }
+            foreach (var kvp in opts.benchesByTag.data)
+            {
+                BenchesByTag[kvp.Key] = ResolveBenches(kvp.Value, kvp.Key);
+            }
+        }
+        _cacheBuilt = true;
+    }
+
+    private static HashSet<ThingDef> ResolveBenches(List<string> defNames, string tag)
+    {
+        if (defNames == null || defNames.Count == 0)
+        {
+            return [];
+        }
+
+        HashSet<ThingDef> uniqueBenches = new HashSet<ThingDef>();
+
+        foreach (string defName in defNames)
+        {
+            ThingDef def = DefDatabase<ThingDef>.GetNamed(defName, false);
+            if (def == null)
+            {
+                Log.Error($"Combat Extended :: AmmoInjector trying to inject ammo with autoCraftTag" + tag + "to crafting bench with defName=" + defName + " but could not be found");
+                continue;
+            }
+            uniqueBenches.Add(def);
+        }
+        return uniqueBenches;
     }
 
     private static void ToggleRecipeOnBench(RecipeDef recipeDef, ThingDef benchDef, bool ammoEnabled)
@@ -295,7 +285,7 @@ public static class AmmoInjector
             {
                 recipeDef.recipeUsers = new List<ThingDef>();
             }
-            recipeDef.recipeUsers.Add(benchDef);
+            recipeDef.recipeUsers.AddDistinct(benchDef);
         }
         else
         {

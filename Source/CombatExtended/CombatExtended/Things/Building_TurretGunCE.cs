@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +21,6 @@ namespace CombatExtended;
 [StaticConstructorOnStartup]
 public class Building_TurretGunCE : Building_Turret
 {
-    private const int minTicksBeforeAutoReload = 1800;              // This much time must pass before haulers will try to automatically reload an auto-turret
     private const int ticksBetweenAmmoChecks = 300;                 // Test nearby ammo every 5 seconds if there's many ammo changes
     private const int ticksBetweenSlowAmmoChecks = 3600;               // Test nearby ammo every minute if there's no ammo changes
     public bool isSlow = false;
@@ -40,7 +39,7 @@ public class Building_TurretGunCE : Building_Turret
     public CompCanBeDormant dormantComp;
     public CompInitiatable initiatableComp;
     public CompMannable mannableComp;
-
+    public CompHackable hackableComp;
     public static Material ForcedTargetLineMat = MaterialPool.MatFrom(GenDraw.LineTexPath, ShaderDatabase.Transparent, new Color(1f, 0.5f, 0.5f));
 
     // New fields
@@ -48,6 +47,7 @@ public class Building_TurretGunCE : Building_Turret
     private CompAmmoUser compAmmo = null;
     private CompFireModes compFireModes = null;
     private CompChangeableProjectile compChangeable = null;
+    private OrbitalTurretExtension orbitalTurretExtension = null;
     public bool isReloading = false;
     private int ticksUntilAutoReload = 0;
     private bool everSpawned = false;
@@ -57,7 +57,10 @@ public class Building_TurretGunCE : Building_Turret
 
     #region Properties
     // Core properties
-    public virtual bool Active => (powerComp == null || powerComp.PowerOn) && (dormantComp == null || dormantComp.Awake) && (initiatableComp == null || initiatableComp.Initiated);
+    public virtual bool Active => (powerComp == null || powerComp.PowerOn) &&
+                                   (dormantComp == null || dormantComp.Awake) &&
+                                   (initiatableComp == null || initiatableComp.Initiated) &&
+                                   (hackableComp == null || !hackableComp.IsHacked);
     public CompEquippable GunCompEq => Gun.TryGetComp<CompEquippable>();
     public NonSnapTurretExtension NonSnapExtension => def.GetModExtension<NonSnapTurretExtension>();
     public bool NonSnap => NonSnapExtension != null;
@@ -154,7 +157,20 @@ public class Building_TurretGunCE : Building_Turret
             return compFireModes;
         }
     }
-    private ProjectilePropertiesCE ProjectileProps => (ProjectilePropertiesCE)compAmmo?.CurAmmoProjectile?.projectile ?? null;
+
+    public OrbitalTurretExtension OrbitalTurretExtension
+    {
+        get
+        {
+            if (orbitalTurretExtension == null && Gun != null)
+            {
+                orbitalTurretExtension = Gun.def.GetModExtension<OrbitalTurretExtension>();
+            }
+            return orbitalTurretExtension;
+        }
+    }
+
+    private ProjectilePropertiesCE ProjectileProps => (ProjectilePropertiesCE)Projectile?.projectile;
     public float MaxWorldRange => ProjectileProps?.shellingProps.range ?? -1f;
     public bool EmptyMagazine => CompAmmo?.EmptyMagazine ?? false;
     public bool FullMagazine => CompAmmo?.FullMagazine ?? false;
@@ -180,6 +196,7 @@ public class Building_TurretGunCE : Building_Turret
         initiatableComp = GetComp<CompInitiatable>();
         powerComp = GetComp<CompPowerTrader>();
         mannableComp = GetComp<CompMannable>();
+        hackableComp = GetComp<CompHackable>();
 
         if (!everSpawned && (!Map.IsPlayerHome || Faction != Faction.OfPlayer))
         {
@@ -196,7 +213,7 @@ public class Building_TurretGunCE : Building_Turret
             //Delay auto-reload for a few seconds after spawn, so player can operate the turret right after placing it, before other colonists start reserving it for reload jobs
             if (mannableComp != null)
             {
-                ticksUntilAutoReload = minTicksBeforeAutoReload;
+                ticksUntilAutoReload = Controller.settings.SecondsAfterFightToOpportunisticReload * GenTicks.TicksPerRealSecond;
             }
         }
 
@@ -241,6 +258,10 @@ public class Building_TurretGunCE : Building_Turret
 
     public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)    // Added GenClosestAmmo unsubscription
     {
+        if (mode == DestroyMode.Deconstruct)
+        {
+            compAmmo?.TryUnload();
+        }
         Map.GetComponent<TurretTracker>().Unregister(this);
         base.DeSpawn(mode);
         ResetCurrentTarget();
@@ -528,7 +549,7 @@ public class Building_TurretGunCE : Building_Turret
 
     public virtual void BeginBurst()                     // Added handling for ticksUntilAutoReload
     {
-        ticksUntilAutoReload = minTicksBeforeAutoReload;
+        ticksUntilAutoReload = Controller.settings.SecondsAfterFightToOpportunisticReload * GenTicks.TicksPerRealSecond;
         if (AttackVerb is Verb_ShootMortarCE shootMortar)
         {
             if (globalTargetInfo.IsValid)
@@ -673,7 +694,7 @@ public class Building_TurretGunCE : Building_Turret
     {
         ResetCurrentTarget();
         ResetForcedTarget();
-        int distanceToTarget = Find.WorldGrid.TraversalDistanceBetween(Map.Tile, targetInfo.Tile, true, maxDist: (int)(this.MaxWorldRange * 1.5f));
+        int distanceToTarget = ShellingUtility.GetDistancePlanetTiles(Map.Tile, targetInfo.Tile, (int)(MaxWorldRange * 1.5f));
         if (distanceToTarget > MaxWorldRange)
         {
             return false;
@@ -695,8 +716,8 @@ public class Building_TurretGunCE : Building_Turret
 
     public virtual void TryOrderAttackWorldTile(GlobalTargetInfo targetInf, IntVec3? cell = null)
     {
-        int startingTile = Map.Tile;
-        int destinationTile = targetInf.Tile;
+        PlanetTile startingTile = Map.Tile;
+        PlanetTile destinationTile = targetInf.Tile;
 
         Vector3 direction = (Find.WorldGrid.GetTileCenter(startingTile) - Find.WorldGrid.GetTileCenter(destinationTile)).normalized;
         Vector3 shotPos = DrawPos.Yto0();
@@ -731,7 +752,7 @@ public class Building_TurretGunCE : Building_Turret
         // Ammo gizmos
         if (CompAmmo != null && (PlayerControlled || Prefs.DevMode))
         {
-            foreach (Command com in CompAmmo.CompGetGizmosExtra())
+            foreach (var com in CompAmmo.CompGetGizmosExtra())
             {
                 if (!PlayerControlled && Prefs.DevMode && com is GizmoAmmoStatus)
                 {
@@ -741,7 +762,7 @@ public class Building_TurretGunCE : Building_Turret
                 yield return com;
             }
         }
-        if (IsMortar && Active && Faction.IsPlayerSafe() && (compAmmo?.UseAmmo ?? false) && ProjectileProps?.shellingProps != null)
+        if (IsMortar && Active && Faction.IsPlayerSafe() && ProjectileProps?.shellingProps != null)
         {
             Command_ArtilleryTarget wt = new Command_ArtilleryTarget()
             {
@@ -913,7 +934,7 @@ public class Building_TurretGunCE : Building_Turret
         }
 
         //Only have manningPawn reload after a long time of no firing
-        if (!forced && Reloadable && (compAmmo.CurMagCount != 0 || ticksUntilAutoReload > 0))
+        if (!forced && Reloadable && (compAmmo.CurMagCount > compAmmo.TryReloadOn || ticksUntilAutoReload > 0))
         {
             return;
         }

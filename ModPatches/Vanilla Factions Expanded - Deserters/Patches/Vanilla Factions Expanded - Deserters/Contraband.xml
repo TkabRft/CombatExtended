@@ -3,8 +3,9 @@
 
 	<!-- Allow ammo for Empire/Deserter weapons to be purchased using intel. -->
 
-	<Operation Class="CombatExtended.PatchOperation_ConditionalGeneric">
-		<standard Class="PatchOperationAddModExtension">
+	<Operation Class="CombatExtended.PatchOperationSettingsConditional">
+		<settingName>genericAmmo</settingName>
+		<nomatch Class="PatchOperationAddModExtension">
 			<xpath>Defs/ThingDef[defName="Ammo_6x24mmCharged"]</xpath>
 			<value>
 				<li Class="VFED.ContrabandExtension">
@@ -14,8 +15,8 @@
 					<countMult>100</countMult>
 				</li>
 			</value>
-		</standard>
-		<generic Class="PatchOperationAddModExtension">
+		</nomatch>
+		<match Class="PatchOperationAddModExtension">
 			<xpath>Defs/ThingDef[defName="Ammo_RifleCharged"]</xpath>
 			<value>
 				<li Class="VFED.ContrabandExtension">
@@ -25,11 +26,12 @@
 					<countMult>100</countMult>
 				</li>
 			</value>
-		</generic>
+		</match>
 	</Operation>
 
-	<Operation Class="CombatExtended.PatchOperation_ConditionalGeneric">
-		<standard Class="PatchOperationAddModExtension">
+	<Operation Class="CombatExtended.PatchOperationSettingsConditional">
+		<settingName>genericAmmo</settingName>
+		<nomatch Class="PatchOperationAddModExtension">
 			<xpath>Defs/ThingDef[defName="Ammo_6x24mmCharged_AP"]</xpath>
 			<value>
 				<li Class="VFED.ContrabandExtension">
@@ -39,8 +41,8 @@
 					<countMult>100</countMult>
 				</li>
 			</value>
-		</standard>
-		<generic Class="PatchOperationAddModExtension">
+		</nomatch>
+		<match Class="PatchOperationAddModExtension">
 			<xpath>Defs/ThingDef[defName="Ammo_RifleCharged_AP"]</xpath>
 			<value>
 				<li Class="VFED.ContrabandExtension">
@@ -50,11 +52,12 @@
 					<countMult>100</countMult>
 				</li>
 			</value>
-		</generic>
+		</match>
 	</Operation>
 
-	<Operation Class="CombatExtended.PatchOperation_ConditionalGeneric">
-		<standard Class="PatchOperationAddModExtension">
+	<Operation Class="CombatExtended.PatchOperationSettingsConditional">
+		<settingName>genericAmmo</settingName>
+		<nomatch Class="PatchOperationAddModExtension">
 			<xpath>Defs/ThingDef[defName="Ammo_6x24mmCharged_Ion"]</xpath>
 			<value>
 				<li Class="VFED.ContrabandExtension">
@@ -64,8 +67,8 @@
 					<countMult>100</countMult>
 				</li>
 			</value>
-		</standard>
-		<generic Class="PatchOperationAddModExtension">
+		</nomatch>
+		<match Class="PatchOperationAddModExtension">
 			<xpath>Defs/ThingDef[defName="Ammo_RifleCharged_Ion"]</xpath>
 			<value>
 				<li Class="VFED.ContrabandExtension">
@@ -75,7 +78,7 @@
 					<countMult>100</countMult>
 				</li>
 			</value>
-		</generic>
+		</match>
 	</Operation>
 
 	<!-- Combat Extended: Guns -->
@@ -96,8 +99,9 @@
 		</match>
 	</Operation>
 
-	<Operation Class="CombatExtended.PatchOperation_ConditionalGeneric">
-		<standard Class="PatchOperationAddModExtension">
+	<Operation Class="CombatExtended.PatchOperationSettingsConditional">
+		<settingName>genericAmmo</settingName>
+		<nomatch Class="PatchOperationAddModExtension">
 			<xpath>Defs/ThingDef[defName="Ammo_8x50mmCharged"]</xpath>
 			<value>
 				<li Class="VFED.ContrabandExtension">
@@ -107,11 +111,12 @@
 					<countMult>100</countMult>
 				</li>
 			</value>
-		</standard>
+		</nomatch>
 	</Operation>
 
-	<Operation Class="CombatExtended.PatchOperation_ConditionalGeneric">
-		<standard Class="PatchOperationAddModExtension">
+	<Operation Class="CombatExtended.PatchOperationSettingsConditional">
+		<settingName>genericAmmo</settingName>
+		<nomatch Class="PatchOperationAddModExtension">
 			<xpath>Defs/ThingDef[defName="Ammo_8x50mmCharged_AP"]</xpath>
 			<value>
 				<li Class="VFED.ContrabandExtension">
@@ -121,11 +126,12 @@
 					<countMult>100</countMult>
 				</li>
 			</value>
-		</standard>
+		</nomatch>
 	</Operation>
 
-	<Operation Class="CombatExtended.PatchOperation_ConditionalGeneric">
-		<standard Class="PatchOperationAddModExtension">
+	<Operation Class="CombatExtended.PatchOperationSettingsConditional">
+		<settingName>genericAmmo</settingName>
+		<nomatch Class="PatchOperationAddModExtension">
 			<xpath>Defs/ThingDef[defName="Ammo_8x50mmCharged_Ion"]</xpath>
 			<value>
 				<li Class="VFED.ContrabandExtension">
@@ -135,7 +141,7 @@
 					<countMult>100</countMult>
 				</li>
 			</value>
-		</standard>
+		</nomatch>
 	</Operation>
 
 	<!-- Remove Charge Lance from available contraband. -->

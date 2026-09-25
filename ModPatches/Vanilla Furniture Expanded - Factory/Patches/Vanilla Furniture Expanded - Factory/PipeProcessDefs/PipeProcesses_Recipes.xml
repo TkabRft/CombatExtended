@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+	<!-- Updating factory shell recipes to reflect base Combat Extended recipes -->
+	<!-- Note that the component costs of these shells had to be rolled into the steel costs because the ammo press factory building only has two inputs, and thus can't accept three inputs -->
+	
+	<!-- High-explosive -->
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeHighExplosiveShells"]/ingredients/li[thing="Steel"]/countNeeded</xpath>
+		<value>
+			<countNeeded>78</countNeeded>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeHighExplosiveShells"]/ingredients/li[thing="Chemfuel"]/countNeeded</xpath>
+		<value>
+			<countNeeded>10</countNeeded>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeHighExplosiveShells"]/ingredients/li[thing="Chemfuel"]/thing</xpath>
+		<value>
+			<thing>FSX</thing>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeHighExplosiveShells"]/results/li[thing="Shell_HighExplosive"]/count</xpath>
+		<value>
+			<count>5</count>
+		</value>
+	</Operation>
+	
+	<!-- Incendiary -->
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeIncendiaryShells"]/ingredients/li[thing="Steel"]/countNeeded</xpath>
+		<value>
+			<countNeeded>82</countNeeded>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeIncendiaryShells"]/ingredients/li[thing="Chemfuel"]/countNeeded</xpath>
+		<value>
+			<countNeeded>5</countNeeded>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeIncendiaryShells"]/ingredients/li[thing="Chemfuel"]/thing</xpath>
+		<value>
+			<thing>Prometheum</thing>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeIncendiaryShells"]/results/li[thing="Shell_Incendiary"]/count</xpath>
+		<value>
+			<count>5</count>
+		</value>
+	</Operation>
+	
+	<!-- EMP -->
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeEMPShells"]/ingredients/li[thing="Steel"]/countNeeded</xpath>
+		<value>
+			<countNeeded>54</countNeeded>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeEMPShells"]/ingredients/li[thing="ComponentIndustrial"]/countNeeded</xpath>
+		<value>
+			<countNeeded>14</countNeeded>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeEMPShells"]/results/li[thing="Shell_EMP"]/count</xpath>
+		<value>
+			<count>5</count>
+		</value>
+	</Operation>
+	
+	<!-- Foam -->
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeFirefoamShells"]/ingredients/li[thing="Steel"]/countNeeded</xpath>
+		<value>
+			<countNeeded>66</countNeeded>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeFirefoamShells"]/ingredients</xpath>
+		<value>
+			<li>
+				<thing>Chemfuel</thing>
+				<countNeeded>25</countNeeded>
+			</li>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeFirefoamShells"]/results/li[thing="Shell_Firefoam"]/count</xpath>
+		<value>
+			<count>5</count>
+		</value>
+	</Operation>
+	
+	<!-- Smoke -->
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeSmokeShells"]/ingredients/li[thing="Steel"]/countNeeded</xpath>
+		<value>
+			<countNeeded>66</countNeeded>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeSmokeShells"]/ingredients</xpath>
+		<value>
+			<li>
+				<thing>Prometheum</thing>
+				<countNeeded>2</countNeeded>
+			</li>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeSmokeShells"]/results/li[thing="Shell_Smoke"]/count</xpath>
+		<value>
+			<count>5</count>
+		</value>
+	</Operation>
+	
+	<!-- Tox -->
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeToxShells"]/ingredients/li[thing="Steel"]/countNeeded</xpath>
+		<value>
+			<countNeeded>78</countNeeded>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeToxShells"]/ingredients/li[thing="Chemfuel"]/countNeeded</xpath>
+		<value>
+			<countNeeded>2</countNeeded>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeToxShells"]/ingredients/li[thing="Chemfuel"]/thing</xpath>
+		<value>
+			<thing>Prometheum</thing>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeToxShells"]/results/li[thing="Shell_Toxic"]/count</xpath>
+		<value>
+			<count>5</count>
+		</value>
+	</Operation>
+	
+	<!-- Deadlife -->
+	
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeDeadlifeShells"]/ingredients</xpath>
+		<value>
+			<li>
+				<thing>Steel</thing>
+				<countNeeded>78</countNeeded>
+			</li>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeDeadlifeShells"]/ingredients/li[thing="Bioferrite"]/countNeeded</xpath>
+		<value>
+			<countNeeded>25</countNeeded>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeDeadlifeShells"]/results/li[thing="Shell_Deadlife"]/count</xpath>
+		<value>
+			<count>5</count>
+		</value>
+	</Operation>
+	
+	<!-- VFE - Factory adds recipes for the new shell types from VFE - Deserters, which Combat Extended removes. So we also remove those recipes here -->
+	
+	<Operation Class="PatchOperationFindMod">
+		<mods>
+			<li>Vanilla Factions Expanded - Deserters</li>
+		</mods>
+		<match Class="PatchOperationSequence">
+			<operations>
+			
+				<li Class="PatchOperationRemove">
+					<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeShrapnelShells"]</xpath>
+				</li>
+				
+				<li Class="PatchOperationRemove">
+					<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeArmorPiercingShells"]</xpath>
+				</li>
+				<li Class="PatchOperationRemove">
+					<xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_MakeClusterShells"]</xpath>
+				</li>
+				
+				<!-- We use more generic patches here so we remove the recipes from any and all factory machines that have the recipe -->
+				
+				<li Class="PatchOperationRemove">
+					<xpath>//li[text()="VFEFactory_MakeShrapnelShells"]</xpath>
+				</li>
+				
+				<li Class="PatchOperationRemove">
+					<xpath>//li[text()="VFEFactory_MakeArmorPiercingShells"]</xpath>
+				</li>
+				
+				<li Class="PatchOperationRemove">
+					<xpath>//li[text()="VFEFactory_MakeClusterShells"]</xpath>
+				</li>
+				
+			</operations>
+		</match>
+	</Operation>
+</Patch>

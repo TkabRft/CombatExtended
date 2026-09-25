@@ -24,6 +24,7 @@ public class Building_Turret_MultiVerbs : Building_TurretGunCE
     protected IEnumerable<ITargetSearcher> VerbsWithTargetSearcher => cachedVerbsWithTargetSearcher ??= GunCompEq.AllVerbs.OfType<ITargetSearcher>().ToList();
     protected override void DrawRangeRings()
     {
+        base.DrawRangeRings();
         var colors = ColorsForRangeRing.GetEnumerator();
         Color color = Color.white;
         IEnumerable<Verb> verbs = (Controller.settings.EnableCIWS ? GunCompEq.AllVerbs : GunCompEq.AllVerbs.Where(x => !(x is VerbCIWS))).Except(AttackVerb);

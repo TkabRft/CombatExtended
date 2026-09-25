@@ -29,6 +29,8 @@
 		<value>
 			<li Class="CombatExtended.DamageDefExtensionCE">
 				<isAmbientDamage>true</isAmbientDamage>
+				<secondaryDamageShieldOverride>true</secondaryDamageShieldOverride>
+				<shieldDamageMultiplier>2.5</shieldDamageMultiplier>
 			</li>
 		</value>
 	</Operation>
@@ -231,6 +233,15 @@
 			<li Class="CombatExtended.DamageDefExtensionCE">
 				<canCauseWallFragmentation>false</canCauseWallFragmentation>
 			</li>
+		</value>
+	</Operation>
+
+	<!-- ========== Add soundExplosion to Bullet for cookoff ========== -->
+
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/DamageDef[defName="Bullet"]</xpath>
+		<value>
+			<soundExplosion>Explosion_Bomb</soundExplosion>
 		</value>
 	</Operation>
 

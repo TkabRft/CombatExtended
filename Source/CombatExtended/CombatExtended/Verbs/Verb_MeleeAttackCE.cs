@@ -363,12 +363,26 @@ public class Verb_MeleeAttackCE : Verb_MeleeAttack
     {
         //START 1:1 COPY Verb_MeleeAttack.DamageInfosToApply
         float damAmount = verbProps.AdjustedMeleeDamageAmount(this, CasterPawn);
-        var critModifier = isCrit && verbProps.meleeDamageDef.armorCategory == DamageArmorCategoryDefOf.Sharp &&
+        DamageDef damDef = verbProps.meleeDamageDef;
+
+        // Check for trait-based melee damage override
+        if (EquipmentSource?.TryGetComp(out CompUniqueWeapon uniqueComp) ?? false)
+        {
+            foreach (WeaponTraitDef trait in uniqueComp.TraitsListForReading)
+            {
+                if (trait is CustomWeaponTraitDef { meleeDamageOverride: { } overrideDef })
+                {
+                    damDef = overrideDef;
+                    break;
+                }
+            }
+        }
+
+        var critModifier = isCrit && damDef.armorCategory == DamageArmorCategoryDefOf.Sharp &&
                            !CasterPawn.def.race.Animal
                            ? 2
                            : 1;
-        var armorPenetration = (verbProps.meleeDamageDef.armorCategory == DamageArmorCategoryDefOf.Sharp ? ArmorPenetrationSharp : ArmorPenetrationBlunt) * critModifier;
-        DamageDef damDef = verbProps.meleeDamageDef;
+        var armorPenetration = (damDef.armorCategory == DamageArmorCategoryDefOf.Sharp ? ArmorPenetrationSharp : ArmorPenetrationBlunt) * critModifier;
         BodyPartGroupDef bodyPartGroupDef = null;
         HediffDef hediffDef = null;
 
@@ -552,10 +566,11 @@ public class Verb_MeleeAttackCE : Verb_MeleeAttack
         {
             return 1f;
         }
+
+        float chance = CasterPawn.GetStatValue(StatDefOf.MeleeHitChance, true);
+
         if (CasterPawn.skills != null)
         {
-            float chance = CasterPawn.GetStatValue(StatDefOf.MeleeHitChance, true);
-
             if (ModsConfig.IdeologyActive && target.HasThing)
             {
                 if (DarknessCombatUtility.IsOutdoorsAndLit(target.Thing))
@@ -590,10 +605,9 @@ public class Verb_MeleeAttackCE : Verb_MeleeAttack
                     chance *= 0.7f;
                     break;
             }
-
-            return chance;
         }
-        return DefaultHitChance;
+
+        return chance;
     }
 
     private float GetDodgeChance(Pawn defender)
@@ -749,9 +763,10 @@ public class Verb_MeleeAttackCE : Verb_MeleeAttack
                 dinfo.SetBodyRegion(BodyPartHeight.Undefined, BodyPartDepth.Outside);
                 dinfo.SetAngle((CasterPawn.Position - defender.Position).ToVector3());
                 caster.TakeDamage(dinfo);
-                if (!parryThing.Stuff.stuffProps.soundMeleeHitBlunt.NullOrUndefined())
+                var stuffProps = parryThing.Stuff?.stuffProps;
+                if (stuffProps != null && !stuffProps.soundMeleeHitBlunt.NullOrUndefined())
                 {
-                    sound = parryThing.Stuff.stuffProps.soundMeleeHitBlunt;
+                    sound = stuffProps.soundMeleeHitBlunt;
                 }
             }
             else

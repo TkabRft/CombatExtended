@@ -69,7 +69,14 @@ public abstract class ProjectileCE : ThingWithComps
 
     public DamageDef damageDefOverride;
 
+    // Per-instance explosion override from weapon traits, set by Verb_LaunchProjectileCE
+    public TraitExplosionDef traitExplosion;
+
+    // Per-instance homing acceleration from weapon traits (cells/s/s)
+    public float homingAcceleration;
+
     public DamageDef DamageDef => damageDefOverride ?? def.projectile.damageDef;
+    public float ShieldDamageMultiplier => Props.shieldDamageMultiplier;
 
     public Thing intendedTargetThing
     {
@@ -99,6 +106,10 @@ public abstract class ProjectileCE : ThingWithComps
             }
 
             return ((float)this.damageAmount) * RemainingKineticEnergyPct;
+        }
+        set
+        {
+            damageAmount = value;
         }
     }
     public virtual float PenetrationAmount
@@ -190,6 +201,7 @@ public abstract class ProjectileCE : ThingWithComps
     public float startingTicksToImpact;
 
     public int FlightTicks = 0;
+    public float intendedTargetHeight = 0f;
 
     #endregion
 
@@ -393,7 +405,7 @@ public abstract class ProjectileCE : ThingWithComps
         Scribe_Values.Look(ref fuelTicks, "fuelTicks");
         Scribe_Values.Look(ref velocity, "velocity");
         Scribe_Values.Look(ref initialSpeed, "initialSpeed");
-
+        Scribe_Values.Look(ref homingAcceleration, "homingAcceleration");
 
         //To fix landed grenades sl problem
         Scribe_Values.Look(ref exactPosition, "exactPosition");
@@ -402,12 +414,17 @@ public abstract class ProjectileCE : ThingWithComps
         Scribe_Values.Look(ref FlightTicks, "flightTicks");
         Scribe_Values.Look(ref OriginIV3, "originIV3", new IntVec3(this.origin));
         Scribe_Values.Look(ref Destination, "destination", this.origin + Vector2.up.RotatedBy(shotRotation) * DistanceTraveled);
+        Scribe_Values.Look(ref intendedTargetHeight, nameof(intendedTargetHeight), 0f);
         // To insure saves don't get affected..
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
         {
 
             GravityPerHeight = this.Props.GravityPerHeight;
             GravityPerWidth = this.Props.GravityPerWidth;
+            if (homingAcceleration > 0f)
+            {
+                forcedTrajectoryWorker = HomingBulletTrajectoryWorker.Instance;
+            }
         }
     }
     #endregion
@@ -456,7 +473,19 @@ public abstract class ProjectileCE : ThingWithComps
     #endregion
 
     #region Raycast
-    public virtual void RayCast(Thing launcher, VerbProperties verbProps, Vector2 origin, float shotAngle, float shotRotation, float shotHeight = 0f, float shotSpeed = -1f, float spreadDegrees = 0f, float aperatureSize = 0.03f, Thing equipment = null)
+    public virtual void RayCast(
+        Thing launcher,
+        VerbProperties verbProps,
+        Vector2 origin,
+        float shotAngle,
+        float shotRotation,
+        float shotHeight = 0f,
+        float shotSpeed = -1f,
+        float spreadDegrees = 0f,
+        float aperatureSize = 0.03f,
+        Thing equipment = null,
+        bool useSameHeight = false
+    )
     {
 
         float magicSpreadFactor = Mathf.Sin(0.06f / 2 * Mathf.Deg2Rad) + aperatureSize;
@@ -509,6 +538,11 @@ public abstract class ProjectileCE : ThingWithComps
                 LastPos = destination;
                 Position = ExactPosition.ToIntVec3();
 
+                if (useSameHeight)
+                {
+                    muzzle.y = destination.y;
+                }
+
                 lbce.SpawnBeam(muzzle, destination);
                 RayCastSuppression(muzzle.ToIntVec3(), destination.ToIntVec3());
                 lbce.Impact(null, muzzle);
@@ -551,9 +585,13 @@ public abstract class ProjectileCE : ThingWithComps
                 LastPos = destination;
                 Position = ExactPosition.ToIntVec3();
 
+                if (useSameHeight)
+                {
+                    muzzle.y = destination.y;
+                }
+
                 lbce.SpawnBeam(muzzle, destination);
                 RayCastSuppression(muzzle.ToIntVec3(), destination.ToIntVec3());
-
                 lbce.Impact(thing, muzzle);
 
                 return;
@@ -563,10 +601,89 @@ public abstract class ProjectileCE : ThingWithComps
         }
         if (lbce != null)
         {
+            if (useSameHeight)
+            {
+                muzzle.y = destination.y;
+            }
+
             lbce.SpawnBeam(muzzle, destination);
             RayCastSuppression(muzzle.ToIntVec3(), destination.ToIntVec3());
             Destroy(DestroyMode.Vanish);
             return;
+        }
+    }
+
+    public void RayCastWorldTarget(
+       Thing launcher,
+       Verb_ShootCE verbToUse,
+       Vector2 originLocal,
+       float shotAngle,
+       float shotHeight,
+       float shotSpeed = -1f,
+       float spreadDegrees = 0f,
+       float aperatureSize = 0.03f,
+       Thing equipment = null
+   )
+    {
+        if (!globalTargetInfo.IsValid)
+        {
+            Log.Warning("Cannot Raycast on a world target without globalTargetInfo");
+            return;
+        }
+
+        // --- Graphical part
+
+        // Let's fire only on the exit cell
+        Vector3 u = verbToUse.Caster.TrueCenter();
+        Vector3 v = verbToUse.currentTarget.Cell.ToVector3Shifted();
+        var d = v - u;
+        var precisedShotRotation = (-90 + Mathf.Rad2Deg * Mathf.Atan2(d.z, d.x)) % 360;
+
+        // create the local raycast
+        this.RayCast(
+            launcher,
+            verbToUse.verbProps,
+            originLocal,
+            0, // set angle to 0 so the raycast goes straight (it won't touch anything so it doesn't matter)
+            precisedShotRotation,
+            shotHeight,
+            shotSpeed,
+            0, // no need
+            0, // no need
+            equipment
+        );
+
+        // --- Creating shell to use linked mechanics
+
+        // Seen with N7Huntsman, it's better to let the user decide the speed, as instant projectiles can be railguns.
+        // Props.shellingProps.tilesPerTick = 99999; // instant speeeeed !
+
+        TravelingRaycast travelingRaycast = (TravelingRaycast)WorldObjectMaker.MakeWorldObject(CE_WorldObjectDefOf.TravelingRaycast);
+        if (launcher?.Faction != null)
+        {
+            travelingRaycast.SetFaction(launcher.Faction);
+        }
+        travelingRaycast.Tile = launcher.Map.Tile;
+        travelingRaycast.SpawnSetup();
+        Find.World.worldObjects.Add(travelingRaycast);
+        travelingRaycast.launcher = launcher;
+        travelingRaycast.equipmentDef = equipmentDef;
+        travelingRaycast.globalSource = new GlobalTargetInfo(OriginIV3, launcher.Map);
+        travelingRaycast.globalSource.tileInt = launcher.Map.Tile;
+        travelingRaycast.globalSource.mapInt = launcher.Map;
+        travelingRaycast.globalSource.worldObjectInt = launcher.Map.Parent;
+        travelingRaycast.shellDef = def;
+        travelingRaycast.globalTarget = globalTargetInfo;
+
+        travelingRaycast.verbToUse = verbToUse;
+        travelingRaycast.spreadDegrees = spreadDegrees;
+        travelingRaycast.aperatureSize = aperatureSize;
+        travelingRaycast.equipement = equipment;
+
+        if (!travelingRaycast.TryTravel(launcher.Map.Tile, globalTargetInfo.Tile))
+        {
+            Log.Error($"CE: Travling raycast {this.def} failed to launch!");
+            travelingRaycast.Destroy();
         }
     }
 
@@ -708,16 +825,16 @@ public abstract class ProjectileCE : ThingWithComps
         {
             return false;
         }
+        // Don't normalize away the 3D component of the projectile position when checking for collisions
+        // between indirect fire projectiles and shields that protect against them
+        // (e.g. mortar shells targeting a high-shield).
         if (CE_Utility.IntersectionPoint(
-                LastPos,
-                newExactPos,
-                shieldPosition,
-                radius,
-                out Vector3[] sect,
-                // Don't normalize away the 3D component of the projectile position when checking for collisions
-                // between indirect fire projectiles and shields that protect against them
-                // (e.g. mortar shells targeting a high-shield).
-                spherical: interceptorComp.Props.interceptAirProjectiles && def.projectile.flyOverhead
+            LastPos,
+            newExactPos,
+            shieldPosition,
+            radius,
+            out Vector3[] sect,
+            spherical: interceptorComp.Props.interceptAirProjectiles && def.projectile.flyOverhead
         ))
         {
             ExactPosition = newExactPos = sect.OrderBy(x => (OriginIV3.ToVector3() - x).sqrMagnitude).First();
@@ -731,40 +848,74 @@ public abstract class ProjectileCE : ThingWithComps
         interceptorComp.lastInterceptTicks = Find.TickManager.TicksGame;
 
         var projectileProperties = def.projectile as ProjectilePropertiesCE;
-        var areWeLucky = Rand.Chance(projectileProperties?.empShieldBreakChance ?? 0);
-        if (areWeLucky && interceptorComp.Props.disarmedByEmpForTicks > 0)
+        // EMP insta break if shield with no hit points. Default hitpoints are -1
+        if (interceptorComp.currentHitPoints < 0)
         {
-            // If the chance check for this EMP projectile succeeds, break the shield using the appropriate damage type
-            // (primary if the primary damage is EMP itself and secondary if EMP damage is only a secondary effect.)
-            // Note that empShieldBreakChance defaults to 1 even for non-EMP projectiles, so a non-EMP projectile
-            // may still technically pass the chance check.
-            var empDamageDef = DamageDef == DamageDefOf.EMP
-                               ? DamageDef
-                               : projectileProperties?.secondaryDamage?.Select(sd => sd.def).FirstOrDefault(sdDef => sdDef == DamageDefOf.EMP);
-
-            if (empDamageDef != null)
+            var areWeLucky = Rand.Chance(projectileProperties?.empShieldBreakChance ?? 0);
+            if (areWeLucky && interceptorComp.Props.disarmedByEmpForTicks > 0)
             {
-                interceptorComp.BreakShieldEmp(new DamageInfo(empDamageDef, empDamageDef.defaultDamage));
+                // If the chance check for this EMP projectile succeeds, break the shield using the appropriate damage type
+                // (primary if the primary damage is EMP itself and secondary if EMP damage is only a secondary effect.)
+                // Note that empShieldBreakChance defaults to 1 even for non-EMP projectiles, so a non-EMP projectile
+                // may still technically pass the chance check.
+                var empDamageDef = DamageDef == DamageDefOf.EMP ? DamageDef : projectileProperties?.secondaryDamage?.Select(sd => sd.def).FirstOrDefault(sdDef => sdDef == DamageDefOf.EMP);
 
-                // Ensure we reset hit points for Biotech's new shields if broken by EMP
-                interceptorComp.currentHitPoints = 0;
-                interceptorComp.startedChargingTick = Find.TickManager.TicksGame;
+                if (empDamageDef != null)
+                {
+                    interceptorComp.BreakShieldEmp(new DamageInfo(empDamageDef, empDamageDef.defaultDamage));
+
+                    // Ensure we reset hit points for Biotech's new shields if broken by EMP
+                    interceptorComp.currentHitPoints = 0;
+                    interceptorComp.startedChargingTick = Find.TickManager.TicksGame;
+                }
             }
         }
-
         // Handle Biotech's new shields used e.g. on the Centurion mech, which, unlike mech cluster shields, can only take
         // a finite amount of damage before breaking.
         // This simply mirrors the corresponding vanilla logic - we apply the incoming damage from our projectile to the shield
         // and break it if we manage to decrease its hitpoints to zero or lower.
         if (interceptorComp.currentHitPoints > 0)
         {
-            interceptorComp.currentHitPoints -= Mathf.FloorToInt(this.DamageAmount);
+
+            float secondaryShieldDamageAmount = 0f;
+            List<SecondaryDamage> secondaryDamageProperties = projectileProperties?.secondaryDamage;
+            DamageDefExtensionCE damDefCE = def.projectile.damageDef.GetModExtension<DamageDefExtensionCE>();
+            var shieldDamageMultiplier = ShieldDamageMultiplier;
+            if (damDefCE != null && damDefCE.shieldDamageMultiplier > ShieldDamageMultiplier)
+            {
+                shieldDamageMultiplier = damDefCE.shieldDamageMultiplier;
+            }
+
+            if (!secondaryDamageProperties.NullOrEmpty())
+            {
+                foreach (SecondaryDamage secondaryDamageInfo in secondaryDamageProperties)
+                {
+                    var secondaryDamageModExt = secondaryDamageInfo.def.GetModExtension<DamageDefExtensionCE>();
+                    if ((secondaryDamageInfo.def.harmsHealth || (secondaryDamageModExt?.secondaryDamageShieldOverride ?? false)) && Rand.Chance(secondaryDamageInfo.chance))
+                    {
+                        var secondaryDamageMultiplierValue = secondaryDamageInfo.shieldDamageMultiplier;
+                        if (secondaryDamageModExt != null && secondaryDamageModExt.shieldDamageMultiplier != secondaryDamageMultiplierValue)
+                        {
+                            secondaryDamageMultiplierValue = secondaryDamageModExt.shieldDamageMultiplier;
+                        }
+                        secondaryShieldDamageAmount += (secondaryDamageInfo.amount * secondaryDamageMultiplierValue);
+
+                    }
+                }
+            }
+            float shieldDamage = this.DamageAmount * shieldDamageMultiplier;
+            int totalShieldDamage = Mathf.FloorToInt(shieldDamage + secondaryShieldDamageAmount);
+            if (Rand.Value > shieldDamage - damageAmount)
+            {
+                totalShieldDamage++;
+            }
+            interceptorComp.currentHitPoints -= totalShieldDamage;
 
             if (interceptorComp.currentHitPoints <= 0)
             {
                 interceptorComp.currentHitPoints = 0;
                 interceptorComp.startedChargingTick = Find.TickManager.TicksGame;
-                interceptorComp.BreakShieldHitpoints(new DamageInfo(DamageDef, this.DamageAmount));
+                interceptorComp.BreakShieldHitpoints(new DamageInfo(DamageDef, totalShieldDamage));
                 return true;
             }
         }
@@ -874,6 +1025,11 @@ public abstract class ProjectileCE : ThingWithComps
             return true;
         }
         var roofChecked = false;
+
+        if (Map.GetLightingTracker().HighestCoverAt(cell) < Mathf.Min(LastPos.y, ExactPosition.y))
+        {
+            return false;
+        }
 
         potentialCollisionCandidates.Clear();
 
@@ -1031,15 +1187,16 @@ public abstract class ProjectileCE : ThingWithComps
         }
 
         var bounds = CE_Utility.GetBoundsFor(thing);
-        if (bounds.Contains(LastPos) || bounds.Contains(ExactPosition))
-        {
-            dist = 0f;
-            return true;
-        }
         if (!bounds.IntersectRay(ShotLine, out dist))
         {
             return false;
         }
+
+        if (bounds.Contains(LastPos) || bounds.Contains(ExactPosition))
+        {
+            return true;
+        }
+
         if (dist * dist > (ExactPosition - LastPos).sqrMagnitude)
         {
             return false;
@@ -1239,27 +1396,7 @@ public abstract class ProjectileCE : ThingWithComps
         {
             if (globalTargetInfo.IsValid)
             {
-                TravelingShell shell = (TravelingShell)WorldObjectMaker.MakeWorldObject(CE_WorldObjectDefOf.TravelingShell);
-                if (launcher?.Faction != null)
-                {
-                    shell.SetFaction(launcher.Faction);
-                }
-                shell.Tile = Map.Tile;
-                shell.SpawnSetup();
-                Find.World.worldObjects.Add(shell);
-                shell.launcher = launcher;
-                shell.equipmentDef = equipmentDef;
-                shell.globalSource = new GlobalTargetInfo(OriginIV3, Map);
-                shell.globalSource.tileInt = Map.Tile;
-                shell.globalSource.mapInt = Map;
-                shell.globalSource.worldObjectInt = Map.Parent;
-                shell.shellDef = def;
-                shell.globalTarget = globalTargetInfo;
-                if (!shell.TryTravel(Map.Tile, globalTargetInfo.Tile))
-                {
-                    Log.Error($"CE: Travling shell {this.def} failed to launch!");
-                    shell.Destroy();
-                }
+                CreateShellWorldObject();
             }
             Destroy();
             return;
@@ -1313,6 +1450,36 @@ public abstract class ProjectileCE : ThingWithComps
         if (ignoreRoof && def.projectile.flyOverhead && shotAngle < 0)
         {
             ignoreRoof = false;
+        }
+    }
+
+    protected void CreateShellWorldObject()
+    {
+        TravelingShell shell = (TravelingShell)WorldObjectMaker.MakeWorldObject(CE_WorldObjectDefOf.TravelingShell);
+        if (launcher?.Faction != null)
+        {
+            shell.SetFaction(launcher.Faction);
+        }
+        shell.Tile = Map.Tile;
+        shell.SpawnSetup();
+        Find.World.worldObjects.Add(shell);
+        shell.launcher = launcher;
+        shell.equipmentDef = equipmentDef;
+        shell.globalSource = new GlobalTargetInfo(OriginIV3, Map);
+        shell.globalSource.tileInt = Map.Tile;
+        shell.globalSource.mapInt = Map;
+        shell.globalSource.worldObjectInt = Map.Parent;
+        shell.shellDef = def;
+        shell.globalTarget = globalTargetInfo;
+        if (Props.shellingProps?.arrivedAtSameProps ?? false)
+        {
+            shell.arrivedShotHeight = shotHeight;
+            shell.arrivedShotSpeed = shotSpeed;
+        }
+        if (!shell.TryTravel(Map.Tile, globalTargetInfo.Tile))
+        {
+            Log.Error($"CE: Travling shell {this.def} failed to launch!");
+            shell.Destroy();
         }
     }
 
@@ -1388,21 +1555,24 @@ public abstract class ProjectileCE : ThingWithComps
             }
         }
 
-        // FIXME : Early opt-out
-        Thing thing = pos.GetFirstPawn(Map);
-        if (thing != null && TryCollideWith(thing))
+        if (Map.GetLightingTracker().HighestCoverAt(pos) > Mathf.Min(LastPos.y, ExactPosition.y))
         {
-            return;
-        }
-
-        var list = Map.thingGrid.ThingsListAt(pos).Where(t => t is Pawn || t.def.Fillage != FillCategory.None).ToList();
-        if (list.Count > 0)
-        {
-            foreach (var thing2 in list)
+            // FIXME : Early opt-out
+            Thing thing = pos.GetFirstPawn(Map);
+            if (thing != null && TryCollideWith(thing))
             {
-                if (TryCollideWith(thing2))
+                return;
+            }
+
+            var list = Map.thingGrid.ThingsListAt(pos).Where(t => t is Pawn || t.def.Fillage != FillCategory.None).ToList();
+            if (list.Count > 0)
+            {
+                foreach (var thing2 in list)
                 {
-                    return;
+                    if (TryCollideWith(thing2))
+                    {
+                        return;
+                    }
                 }
             }
         }
@@ -1454,12 +1624,41 @@ public abstract class ProjectileCE : ThingWithComps
             }
         }
 
-        var explodePos = ExactPosition;
+        // The projectile's position will have been normalized to the point of impact with the Thing,
+        // which may sit exactly on a cell boundary for Things whose hitbox precisely lines up with a cell.
+        // This would always correspond to the cell due east or north of the boundary, which,
+        // when shooting south or west, would be the previous cell on the shotline.
+        // Since we always want explosion effects to occur in the impacted cell, shift the position accordingly
+        // if it is on a cell boundary.
+        Vector3 explodePos = ExactPosition;
+        if (ShotLine.direction.x < 0 && Mathf.Approximately(explodePos.x, (int)explodePos.x))
+        {
+            explodePos.x -= 0.5f;
+        }
+        if (ShotLine.direction.z < 0 && Mathf.Approximately(explodePos.z, (int)explodePos.z))
+        {
+            explodePos.z -= 0.5f;
+        }
+
 
         if (!explodePos.ToIntVec3().IsValid)
         {
             Destroy();
             return;
+        }
+
+        ProjectilePropertiesCE projectileCE = def.projectile as ProjectilePropertiesCE;
+
+        // If this projectile is not supposed to detonate in space-like terrain, skip explosion if needed
+        if (!projectileCE.detonateInSpace)
+        {
+            var terrain = explodePos.ToIntVec3().GetTerrain(Map);
+            // If the terrain is "Space", destroy the projectile without detonating
+            if (terrain.defName == "Space")
+            {
+                Destroy();
+                return;
+            }
         }
 
         if (def.projectile.explosionEffect != null)
@@ -1472,7 +1671,6 @@ public abstract class ProjectileCE : ThingWithComps
         {
             def.projectile.landedEffecter.Spawn(Position, Map, 1f).Cleanup();
         }
-        ProjectilePropertiesCE projectileCE = def.projectile as ProjectilePropertiesCE;
         float effectScale = projectileCE.detonateEffectsScaleOverride > 0 ? projectileCE.detonateEffectsScaleOverride : projectileCE.explosionRadius * 2;
         if (projectileCE.detonateMoteDef != null)
         {
@@ -1496,7 +1694,9 @@ public abstract class ProjectileCE : ThingWithComps
         }
 
         //If the comp exists, it'll already call CompFragments
-        if (explodingComp != null || (def.projectile.explosionRadius > 0f && DamageDef != null))
+        bool hasTraitExplosion = traitExplosion is { radius: > 0f };
+        float effectiveExplosionRadius = hasTraitExplosion ? traitExplosion.radius : def.projectile.explosionRadius;
+        if (explodingComp != null || (effectiveExplosionRadius > 0f && DamageDef != null))
         {
             float explosionSuppressionRadius = SuppressionRadius + (def.projectile.applyDamageToExplosionCellsNeighbors ? 1.5f : 0f);
             //Handle anything explosive
@@ -1505,21 +1705,38 @@ public abstract class ProjectileCE : ThingWithComps
                 ignoredThings.Add(pawn.Corpse);
             }
 
+            // Prevent double damage when trait adds explosion to a bullet that already did direct hit damage
+            if (hasTraitExplosion && hitThing != null && this is BulletCE && !traitExplosion.damageHitTarget)
+            {
+                ignoredThings.Add(hitThing);
+            }
+
             var suppressThings = new List<Pawn>();
             float dangerAmount = 0f;
             var dir = new float?(origin.AngleTo(new Vector2(ExactPosition.x, ExactPosition.z)));
 
             // Opt-out for things without explosionRadius
-            if (def.projectile.explosionRadius > 0f)
+            if (effectiveExplosionRadius > 0f)
             {
+                DamageDef explosionDamage = hasTraitExplosion
+                    ? (traitExplosion.damageDef ?? DamageDef)
+                    : DamageDef;
+                int explosionDamageAmt = hasTraitExplosion && traitExplosion.damageAmount >= 0
+                    ? traitExplosion.damageAmount
+                    : Mathf.FloorToInt(DamageAmount);
+
+                float explosionAP = hasTraitExplosion
+                    ? explosionDamageAmt * AmmoUtility.ExplosiveArmorPenetrationMultiplier
+                    : def.projectile.GetExplosionArmorPenetration();
+
                 GenExplosionCE.DoExplosion(
                     explodePos.ToIntVec3(),
                     Map,
-                    def.projectile.explosionRadius,
-                    DamageDef,
+                    effectiveExplosionRadius,
+                    explosionDamage,
                     launcher,
-                    Mathf.FloorToInt(DamageAmount),
-                    def.projectile.GetExplosionArmorPenetration(),
+                    explosionDamageAmt,
+                    explosionAP,
                     def.projectile.soundExplode,
                     equipmentDef,
                     def,
@@ -1549,7 +1766,7 @@ public abstract class ProjectileCE : ThingWithComps
                 // Apply suppression around impact area
                 if (explodePos.y < SuppressionRadius)
                 {
-                    explosionSuppressionRadius += def.projectile.explosionRadius;
+                    explosionSuppressionRadius += effectiveExplosionRadius;
 
                     if (projectilePropsCE.suppressionFactor > 0f)
                     {

@@ -11,10 +11,18 @@ namespace CombatExtended.HarmonyCE;
 internal static class Harmony_GlobalControls
 {
     private const float magicExtraOffset = 8f;
+    private static WeatherTracker weatherTracker;
+    private static Map cachedMap;
 
     private static void Postfix(ref float curBaseY)
     {
         float offsetXFromOriginalMethod = UI.screenWidth - 200f;
-        Find.CurrentMap?.GetComponent<WeatherTracker>().DoWindGUI(offsetXFromOriginalMethod + magicExtraOffset, ref curBaseY);
+        if (cachedMap != Find.CurrentMap)
+        {
+            cachedMap = Find.CurrentMap;
+            weatherTracker = cachedMap?.GetComponent<WeatherTracker>();
+        }
+
+        weatherTracker?.DoWindGUI(offsetXFromOriginalMethod + magicExtraOffset, ref curBaseY);
     }
 }

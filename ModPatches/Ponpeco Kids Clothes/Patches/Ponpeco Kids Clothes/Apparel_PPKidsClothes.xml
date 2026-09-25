@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+    <Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[defName="Apparel_PKCBackpack"]/statBases</xpath>
+		<value>
+			<Bulk>1.5</Bulk>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="Apparel_PKCBackpack"]/equippedStatOffsets</xpath>
+		<value>
+			<equippedStatOffsets>
+				<CarryBulk>20</CarryBulk>
+			</equippedStatOffsets>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="Apparel_PKCBackpack"]/apparel/bodyPartGroups</xpath>
+		<value>
+			<bodyPartGroups>
+				<li>Shoulders</li>
+			</bodyPartGroups>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="Apparel_PKCBackpack"]/apparel/layers</xpath>
+		<value>
+			<layers>
+				<li>Backpack</li>
+			</layers>
+		</value>
+	</Operation>
+
+	<!-- Equivalent to Romper-->
+    <Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[@Name="PKCApparelMakeableBase"]/statBases/StuffEffectMultiplierArmor</xpath>
+		<value>
+			<StuffEffectMultiplierArmor>1.5</StuffEffectMultiplierArmor>
+			<Bulk>1</Bulk>
+		</value>
+	</Operation>
+
+	<!-- Equivalent to Parka-->
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[@Name="PKCApparelOuterMakeableBase"]/statBases/StuffEffectMultiplierArmor</xpath>
+		<value>
+			<StuffEffectMultiplierArmor>3</StuffEffectMultiplierArmor>
+			<Bulk>5</Bulk>
+			<WornBulk>2.5</WornBulk>
+		</value>
+	</Operation>
+
+	<!-- Equivalent to Cowboy hat-->
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[@Name="PKCHatMakeableBase"]/statBases/StuffEffectMultiplierArmor</xpath>
+		<value>
+			<StuffEffectMultiplierArmor>2</StuffEffectMultiplierArmor>
+			<Bulk>1</Bulk>
+		</value>
+	</Operation>
+
+	<!-- Equivalent to Tuque-->
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="Apparel_PKCCheckedHood"]/statBases/StuffEffectMultiplierArmor</xpath>
+		<value>
+			<StuffEffectMultiplierArmor>2</StuffEffectMultiplierArmor>
+			<Bulk>1</Bulk>
+		</value>
+	</Operation>
+
+	<!-- Equivalent to Steel Helmet for Kids-->
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/ThingDef[defName="Apparel_PKCHeroHelmet"]/statBases</xpath>
+		<value>
+			<Bulk>3</Bulk>
+			<WornBulk>0.75</WornBulk>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="Apparel_PKCHeroHelmet"]/statBases/StuffEffectMultiplierArmor</xpath>
+		<value>
+			<StuffEffectMultiplierArmor>2.5</StuffEffectMultiplierArmor>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="Apparel_PKCHeroHelmet"]/stuffCategories/li[.="Metallic"]</xpath>
+		<value>
+			<li>Steeled</li>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="Apparel_PKCHeroCape"]/statBases/StuffEffectMultiplierArmor</xpath>
+		<value>
+			<StuffEffectMultiplierArmor>1.5</StuffEffectMultiplierArmor>
+			<Bulk>1</Bulk>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="Apparel_PKCRaincoat"]/statBases/StuffEffectMultiplierArmor</xpath>
+		<value>
+			<StuffEffectMultiplierArmor>1.5</StuffEffectMultiplierArmor>
+			<Bulk>2</Bulk>
+			<WornBulk>1</WornBulk>
+		</value>
+	</Operation>
+
+</Patch>

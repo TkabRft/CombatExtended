@@ -13,7 +13,7 @@ public class Multiplayer : IPatch
     public bool CanInstall()
     {
         Log.Message("Combat Extended :: Checking Multiplayer Compat");
-        return ModLister.HasActiveModWithName("Multiplayer");
+        return ModLister.HasActiveModWithName("Multiplayer") || ModLister.GetActiveModWithIdentifier("rwmt.Multiplayer") != null || ModLister.HasActiveModWithName("Multiplayer [Continuous]");
     }
 
     public void Install()
@@ -59,12 +59,23 @@ public class Multiplayer : IPatch
         }
     }
 
-    public static void registerCallbacks(Func<bool> inMP, Func<bool> iec, Func<bool> iecibs)
+    public static void syncField<T>(T target, string field, object val)
+    {
+        if (InMultiplayer)
+        {
+            _syncField(target, typeof(T).FullName + "/" + field, val);
+        }
+    }
+
+    public static void registerCallbacks(Func<bool> inMP, Func<bool> iec, Func<bool> iecibs, Func<object, string, object, bool> sf)
     {
         _inMultiplayer = inMP;
         _isExecutingCommands = iec;
         _isExecutingCommandsIssuedBySelf = iecibs;
+        _syncField = sf;
     }
+
+    private static Func<object, string, object, bool> _syncField = null;
 
     private static Func<bool> _inMultiplayer = null;
 
@@ -77,6 +88,11 @@ public class Multiplayer : IPatch
     {
         public int syncContext = -1;
         public int[] exposeParameters = null;
+    }
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public class SyncFieldAttribute : Attribute
+    {
     }
 
 

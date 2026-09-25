@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+	<!-- Maa'drhn Armor -->
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/GeneDef[defName="ERN_RhyaethBehaviour"]/statOffsets/ArmorRating_Sharp</xpath>
+		<value>
+			<ArmorRating_Sharp>6</ArmorRating_Sharp>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/GeneDef[defName="ERN_RhyaethBehaviour"]/statOffsets/ArmorRating_Blunt</xpath>
+		<value>
+			<ArmorRating_Blunt>9</ArmorRating_Blunt>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/AbilityDef[defName="ERN_ShortFlightRhyaeth"]/verbProperties/range</xpath>
+		<value>
+			<range>22.9</range>
+		</value>
+	</Operation>
+
+</Patch>

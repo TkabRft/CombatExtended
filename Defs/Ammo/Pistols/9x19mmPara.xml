@@ -23,7 +23,7 @@
 
 	<CombatExtended.AmmoSetDef>
 		<defName>AmmoSet_9x19mmParaSD</defName>
-		<label>9x19mm Para Subsonic</label>
+		<label>9x19mm Para</label>
 		<ammoTypes>
 			<Ammo_9x19mmPara_FMJ>Bullet_9x19mmParaSD_FMJ</Ammo_9x19mmPara_FMJ>
 			<Ammo_9x19mmPara_AP>Bullet_9x19mmParaSD_AP</Ammo_9x19mmPara_AP>

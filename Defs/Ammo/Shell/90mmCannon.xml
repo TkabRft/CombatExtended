@@ -164,9 +164,13 @@
 		</comps>
 	</ThingDef>
 
-	<ThingDef ParentName="Base40x365mmBoforsBullet">
+	<ThingDef ParentName="Base90mmCannonShell">
 		<defName>Bullet_90mmCannonShell_AP</defName>
 		<label>90mm cannon shell (AP)</label>
+		<graphicData>
+			<texPath>Things/Projectile/Cannon/AP</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+		</graphicData>
 		<projectile Class="CombatExtended.ProjectilePropertiesCE">
 			<damageDef>Bullet</damageDef>
 			<damageAmountBase>318</damageAmountBase>
@@ -233,9 +237,13 @@
 		</comps>
 	</ThingDef>
 
-	<ThingDef ParentName="Base40x365mmBoforsBullet">
+	<ThingDef ParentName="Base90mmCannonShell">
 		<defName>Bullet_90mmCannonShell_APCR</defName>
 		<label>90mm cannon shell (APCR)</label>
+		<graphicData>
+			<texPath>Things/Projectile/Cannon/APCR</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+		</graphicData>
 		<projectile Class="CombatExtended.ProjectilePropertiesCE">
 			<damageDef>Bullet</damageDef>
 			<damageAmountBase>304</damageAmountBase>

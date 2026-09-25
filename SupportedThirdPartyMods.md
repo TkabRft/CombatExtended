@@ -76,6 +76,7 @@ ABF: Utility Synstructs   |
 ADE Advanced Turrets    |
 ADE Advanced Turrets +  |
 Advanced Mortar (Continued) |
+Advanced Mechanoids |
 All-Tech Melee |
 Alpha Animals |
 Alpha Biomes |
@@ -89,6 +90,7 @@ Alpha Ships |
 Alpha Vehicles - Neolithic  |
 Alpha Vehicles - Age of Sail  |
 Altered Carbon |
+Ancient Armory |
 Ancient Arsenal: Warcaskets |
 Ancient Blade Cyborg  |
 Ancient Eastern Armory  |
@@ -103,6 +105,9 @@ Anima Gear  |
 Animal Collab Project Vanilla-Style |
 Animal Armor: Vanilla	|
 Animal Equipment	|
+Anomalies Expected |
+Anomalies Expected Addon |
+Anomaly Portal |
 Anthro Race |
 Antinium    |
 Anty the War Ant Race |
@@ -122,14 +127,20 @@ Arrow Please (Continued)    |
 Asimov  |
 Aspero Race |
 Astoriel Legacy |
+Astrofuel gear  |
 Astra Militarum Regimentum - Cadia  |
 Astra Militarum Regimentum - Krieg  |
 Astra Militarum Regimentum - Krieg: Officer Helmet  |
 Autocleaner	|
 Auto-Mortars	|
+Bean's Turret Pack  |
 Beast Man Tribes  |
 Beeralope Squad	|
 Beliar Xenotype |
+Beta Anime Hair	|
+Beta Girls und Panzer Hair and Apparel	|
+Better Grenade Handling |
+Better Traders Guild    |
 Better Wool Production - C# Edition	|
 Big and Small - Genes & More	|
 Big and Small - Heaven and Hell
@@ -138,6 +149,8 @@ Big and Small - Medieval Overhaul Factions	|
 Big and Small - Races	|
 Big and Small - Vampires and the Undead  |
 Big and Small - Weapons	|
+Bioferrite Chainsaw |
+Biological Warfare  |
 Biomes! Caverns	|
 Biomes! Core	|
 Biomes! Polluted Lands  |
@@ -194,6 +207,7 @@ Dinosauria |
 Diverse Mechanoid War Procedure |
 Divine Order |
 DOOM - Faction (Continued) |
+Dlc collaboration - Void universe |
 DMWands |
 Dragons Descent    |
 Dragons!	|
@@ -208,11 +222,13 @@ Edge of Descension - Monoblades  |
 Edge of Descension - Vanguard   |
 Edo Themed Expansion	|
 Eltex Bodysuit  |
+Eltex Weaponry (Continued)  |
 Enchanted Sword  |
 Epochs - Pyrinth    |
 Epona The centaur race  |
 Equiums Horse Race	|
 Erin's Au Ra    |
+Erin's Auraeyl  |
 Erin's Auronya   |
 Erin's Auronya - HAR Edition   |
 Erin's Azaphrae |
@@ -224,6 +240,7 @@ Erin's Fox Squirrel |
 Erin's Lizard Doggo |
 Erin's Miqo'te  |
 Erin's Mountain Animals |
+Erin's Rhy'aeth |
 Erin's Sephyr   |
 Erin's Shisune   |
 Erin's Valheim Creatures   |
@@ -263,10 +280,14 @@ Frontline Collection  |
 FROG Suit Set   |
 Fuck it Unboomas Your Lope |
 Gas Traps And Shells	|
+Genetics! Mushkin    |
 Gestalt Engine  |
 Giddy-Up 2    |
+Girls' Frontline 2 Nagan Apparel    |
 Girls' Frontline Apparel Pack	|
+Girls' Frontline PROJECT NEURAL CLOUD   |
 Girls' Frontline Styles - 404 Team	|
+Girls' Frontline Styles - AR Team	|
 Girls' Frontline Styles - DEFY Team	|
 Girls' Frontline Styles - GF2	|
 Girls' Frontline Styles - NL	|
@@ -295,6 +316,7 @@ GrimWorld 40,000 - Scattered Sons |
 GrimWorld 40,000 - Talons of the Emperor |
 Gulden Mod  |
 Half Dragons    |
+Halo - Rimworld Auxiliary Combat Armory	|
 HALO: UNSC Armoury |
 Halo UNSC Weapon Pack	|
 Heavy Melee Weapons |
@@ -327,11 +349,11 @@ Kemomimihouse Kz |
 Kenshi Armory |
 Kerberos Protect Gears and Firearms	|
 K.L.K - Styles Apparel Pack	|
-Kijin Race 3.0     	|     
+Kijin Race 3.0     	|
 Kill la Kill Styles Pack    |
 Killzone Concept Armor Set  |
 Kit's Gunpowder Weapons |
-Kit's Industrial Weapons |   
+Kit's Industrial Weapons |
 Kit's Roman Weapons |
 Kit's VFE Weapons |
 Kobolds of the Rim  |
@@ -351,10 +373,12 @@ Mass Effect - Playable Geth |
 Martens - Nature's Most Adorable Assassins  |
 Mechadroids |
 Mechanized Armor Set    |
+Mechanitor Balance Tweaks      |
 Mechanoid Bench 2   |
 Mechanoid Bench 3   |
 Mechanoids Extraordinaire	|
 Mechanoid Master Blaser |
+Mechanoid Repurposing   |
 Medical Supplements |
 Medical System Expansion	|
 Medieval Bowyer   |
@@ -363,6 +387,7 @@ Medieval Medicines 1.4 Medieval Overhaul Edition |
 Medieval Overhaul   |
 Medieval Overhaul: Arcane Archeologists   |
 Medieval Overhaul: Barbarians   |
+Medieval Overhaul: Hornetkeeping   |
 Medieval Overhaul: House Roxmont  |
 Medieval Overhaul: Royalty  |
 Medieval Tailor   |
@@ -415,6 +440,7 @@ Neclose Race	|
 Nephilim Xenotype Reborn    |
 New Mech: Mini-Miner    |
 Ni'Hal	|
+Nikke The Pilgrim   |
 Nukes   |
 Nyaron Race |
 Nomad Scavengers    |
@@ -446,6 +472,7 @@ Persona Warcasket Weapons   |
 Plasma Weapons Pack   |
 Polarisbloc - Security Force	|
 Poleepkwa Race	|
+Ponpeco Kids' Clothes   |
 Possessed Weapons	|
 pphhyy's Demigryphs   |
 phynilla Expanded Mechs Scyther |
@@ -453,6 +480,7 @@ pphhyy's Lightless Empyrean |
 pphhyy Sanguinary Animals   |
 Prestige Specialist Armours	|
 Prestige Vacsuit Set    |
+Progression Education    |
 Primitive Core |
 Primitive Workbenches |
 Project RimFactory - Materials |
@@ -487,6 +515,7 @@ Remove Industrial Stuff |
 Revia Race |
 Revia Race - biotech |
 Rim Contractors Arsenal	|
+Rim Of Evil: Northern Frontier |
 Rim of Madness - Bones	|
 Rim of Madness - Vampires	|
 Rim of Madness - Werewolves	|
@@ -498,7 +527,7 @@ Rim-Effect: N7	|
 Rimedieval - Medieval Royalty   |
 Rimefeller	|
 Rim-Elves   |
-Rim-Gnoblins	| 
+Rim-Gnoblins	|
 Rim-Hivers!	|
 Rim Flood	|
 Rim-Robots_	|
@@ -508,6 +537,7 @@ RimFantasy - Medieval Overhaul Edition   |
 RimFantasy - House Doyle   |
 RimHammer40k - Dreadnought |
 RimNauts 2 |
+RimOfTheFallen |
 Rimrats |
 RimSec Security |
 Rimsenal - Core |
@@ -520,7 +550,7 @@ Rimsenal Xenotype Pack - Askbarn    |
 Rimsenal Xenotype Pack - Harana |
 Rimsenal Xenotype Pack - Zohar  |
 RimTraits - General Traits  |
-RimTraits – Medieval Talents    |
+RimTraits - Medieval Talents    |
 Rimworld - The Dark Descent |
 Rimworld - Witcher Monster Hunt |
 Rimworld-Style Pilas and Bows Strapped with Grenades and Shells Extended    |
@@ -542,19 +572,20 @@ SCP - Clothing Only	|
 Seren, from Stardust    |
 Sergals, Gnolls, Lions and Frogs	|
 Seventh Seraph  |
+Shambler Variants  |
 Silkiera Race	|
 Simple Ogre Race  |
 Simply More Melee	|
 Slime Rancher	|
 Solark Race |
 Spacer Arsenal  |
-Spacer Pack |
+Spacer Pack - Repackaged |
 Spacer Shields	|
 Space Worms (Continued) |
 Spartan Foundry	|
 Spidercamp's Horses     |
 SRTS Expanded	|
-Stalingrad – Uniforms   |
+Stalingrad - Uniforms   |
 Star Crafters Armory  |
 Star Wars - Factions |
 Starship Troopers Aracnids  |
@@ -566,7 +597,9 @@ Supernatural Weapons    |
 Swords (Continued)  |
 Tactical Extremity Protection [BAL] |
 Textiles+ (continued)   |
+Tiered Mechs    |
 The Corporation - Mort's Factions   |
+The Cosmic Odyssey - Blessings of the Machine God   |
 The Mantodean insectoid race	|
 The Profaned	|
 The REAL flamberg	|
@@ -578,12 +611,14 @@ The Joris Experience	|
 The Tuffalo |
 The Sims Traits |
 Thog's Armor    |
+Thog's Guns - Lead and Powder Pack REPRIMED 1.6  |
 Thog's Guns - More Brukka Pack  |
 Thrumbo Plushie |
 Titan Vehicles Continued |
 Toolmetrics Redux (Continued)   |
 Tools O'Plenty  |
 TouhouStyle	|
+Touhou Style Youmu Character Pack	|
 Tox Weapons Pack	|
 Tribal Warrior Set! |
 Tsar Armory	|
@@ -592,6 +627,7 @@ Twi'lek Race    |
 T's Conversion Staff |
 T's Samurai Faction |
 T's Wild Child Rags |
+UNAGI Another Duster Coat   |
 Useless Clothes |
 Ushankas Glittertech Expansion  |
 VacSlipsuit |
@@ -607,6 +643,7 @@ Vanilla Arsenal |
 Vanilla Base Generation Expanded    |
 Vanilla Brewing Expanded    |
 Vanilla Chemfuel Expanded   |
+Vanilla Events Expanded   |
 Vanilla Factions Expanded - Ancients    |
 Vanilla Factions Expanded - Classical   |
 Vanilla Factions Expanded - Deserters  |
@@ -619,8 +656,9 @@ Vanilla Factions Expanded - Settlers	|
 Vanilla Factions Expanded - Tribals |
 Vanilla Furniture Expanded - Production	|
 Vanilla Furniture Expanded -  Security |
+Vanilla Furniture Expanded -  Factory |
 Vanilla Genetics Expanded   |
-Vanilla Ideology Expanded – Dryads  |
+Vanilla Ideology Expanded - Dryads  |
 Vanilla Ideology Expanded - Hats and Rags |
 Vanilla Ideology Expanded - Memes and Structures    |
 Vanilla Persona Weapons Expanded   |
@@ -629,8 +667,10 @@ Vanilla Prestige Specialist Armours Reworked    |
 Vanilla Psycasts Expanded   |
 Vanilla Psycasts Expanded - Hemosage  |
 Vanilla Psycasts Expanded - Runesmith   |
-Vanilla Quests Expanded - Cryptoforge  |
 Vanilla Quests Expanded - Ancients  |
+Vanilla Quests Expanded - Cryptoforge  |
+Vanilla Quests Expanded - Deadlife  |
+Vanilla Quests Expanded - Drone Factory  |
 Vanilla Races Expanded - Android  |
 Vanilla Races Expanded - Archon |
 Vanilla Races Expanded - Fungoid |
@@ -639,6 +679,7 @@ Vanilla Races Expanded - Hussar  |
 Vanilla Races Expanded - Insector  |
 Vanilla Races Expanded - Lycanthrope  |
 Vanilla Races Expanded - Phytokin  |
+Vanilla Races Expanded - Pigskin  |
 Vanilla Races Expanded - Sanguophage  |
 Vanilla Races Expanded - Saurid  |
 Vanilla Skills Expanded  |

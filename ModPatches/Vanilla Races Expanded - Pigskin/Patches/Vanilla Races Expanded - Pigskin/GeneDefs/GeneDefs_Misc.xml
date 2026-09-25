@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/GeneDef[defName="VRE_Coward"]</xpath>
+		<value>
+			<forcedTraits>
+				<li>
+					<def>Bravery</def>
+					<degree>-1</degree>
+				</li>
+			</forcedTraits>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/GeneDef[defName="VRE_Brave"]</xpath>
+		<value>
+			<forcedTraits>
+				<li>
+					<def>Bravery</def>
+					<degree>1</degree>
+				</li>
+			</forcedTraits>
+		</value>
+	</Operation>
+
+</Patch>

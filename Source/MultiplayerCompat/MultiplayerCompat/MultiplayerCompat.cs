@@ -8,10 +8,12 @@ using CombatExtended.Loader;
 using System.Collections.Generic;
 
 using SyncMethodAttribute = global::CombatExtended.Compatibility.Multiplayer.SyncMethodAttribute;
+using SyncFieldAttribute = global::CombatExtended.Compatibility.Multiplayer.SyncFieldAttribute;
 
 namespace CombatExtended.Compatibility.MultiplayerAPI;
 public class MultiplayerCompat : IModPart
 {
+    private static Dictionary<string, ISyncField> syncFieldAttributes;
     public MultiplayerCompat() { }
     public Type GetSettingsType()
     {
@@ -30,6 +32,18 @@ public class MultiplayerCompat : IModPart
     }
     public void SlowInit(ModContentPack content)
     {
+        syncFieldAttributes = new();
+        var fields = content.assemblies.loadedAssemblies
+                      .SelectMany(a => a.GetTypes())
+                      .SelectMany(t => t.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+                      .Where(m => m.HasAttribute<SyncFieldAttribute>());
+
+        foreach (var field in fields)
+        {
+            var syncField = MP.RegisterSyncField(field.DeclaringType, field.Name).SetBufferChanges();
+            syncFieldAttributes[field.DeclaringType.FullName + "/" + field.Name] = syncField;
+        }
+
         var methods = content.assemblies.loadedAssemblies
                       .SelectMany(a => a.GetTypes())
                       .SelectMany(t => t.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
@@ -64,17 +78,28 @@ public class MultiplayerCompat : IModPart
 
         MP.RegisterAll();
 
-        global::CombatExtended.Compatibility.Multiplayer.registerCallbacks((() => MP.IsInMultiplayer), (() => MP.IsExecutingSyncCommand), (() => MP.IsExecutingSyncCommandIssuedBySelf));
+        global::CombatExtended.Compatibility.Multiplayer.registerCallbacks((() => MP.IsInMultiplayer),
+                                                                           (() => MP.IsExecutingSyncCommand),
+                                                                           (() => MP.IsExecutingSyncCommandIssuedBySelf),
+                                                                           SynchronizeField);
     }
 
-
-
+    private static bool SynchronizeField(object obj, string field, object val)
+    {
+        syncFieldAttributes[field].DoSync(obj, val);
+        return true;
+    }
+    /*
+      We enable nullable context for the rest of this file, because the Multiplayer API can call these functions with a null thing to synchronize on the reading end.
+      When writing, the comp should never be null.  
+     */
+#nullable enable
     [SyncWorker]
-    private static void SyncCompAmmoUser(SyncWorker sync, ref CompAmmoUser comp)
+    private static void SyncCompAmmoUser(SyncWorker sync, ref CompAmmoUser? comp)
     {
         if (sync.isWriting)
         {
-            var caster = comp.parent.GetComp<CompEquippable>().PrimaryVerb.Caster;
+            var caster = comp!.parent.GetComp<CompEquippable>().PrimaryVerb.Caster;
 
             // Sync the turret because in that case syncing fails, due to comp.parent.Map being null,
             // which causes it to be inaccessible in MP for general syncing
@@ -106,11 +131,11 @@ public class MultiplayerCompat : IModPart
     }
 
     [SyncWorker]
-    private static void SyncCompFireMode(SyncWorker sync, ref CompFireModes comp)
+    private static void SyncCompFireMode(SyncWorker sync, ref CompFireModes? comp)
     {
         if (sync.isWriting)
         {
-            var caster = comp.Caster;
+            var caster = comp!.Caster;
 
             // Sync the turret because in that case syncing fails, due to comp.parent.Map being null,
             // which causes it to be inaccessible in MP for general syncing
@@ -142,11 +167,11 @@ public class MultiplayerCompat : IModPart
     }
 
     [SyncWorker]
-    private static void SyncLoadout(SyncWorker sync, ref Loadout loadout)
+    private static void SyncLoadout(SyncWorker sync, ref Loadout? loadout)
     {
         if (sync.isWriting)
         {
-            sync.Write(loadout.UniqueID);
+            sync.Write(loadout!.UniqueID);
         }
         else
         {
@@ -156,7 +181,7 @@ public class MultiplayerCompat : IModPart
     }
 
     [SyncWorker]
-    private static void SyncLoadoutSlot(SyncWorker sync, ref LoadoutSlot loadoutSlot)
+    private static void SyncLoadoutSlot(SyncWorker sync, ref LoadoutSlot? loadoutSlot)
     {
         if (sync.isWriting)
         {
@@ -199,6 +224,7 @@ public class MultiplayerCompat : IModPart
     // Don't sync anything, we just want a blank instance for method calling purposes
     // We only care about shouldConstruct being true
     [SyncWorker(shouldConstruct = true)]
-    private static void SyncITab_Inventory(SyncWorker sync, ref ITab_Inventory inventory)
+    private static void SyncITab_Inventory(SyncWorker sync, ref ITab_Inventory? inventory)
     { }
 }
+#nullable restore

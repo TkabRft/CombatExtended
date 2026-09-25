@@ -46,7 +46,7 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
     {
         get
         {
-            return CompFireModes != null ? ShotsPerBurstFor(CompFireModes.CurrentFireMode) : VerbPropsCE.burstShotCount;
+            return ShotsPerBurstFor(CompFireModes?.CurrentFireMode ?? FireMode.AutoFire);
         }
     }
 
@@ -81,6 +81,8 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
             return false;
         }
     }
+
+    public override bool ShouldSpawnAimingSound => !_isAiming;
 
     public override float SwayAmplitude // TODO: Fix SwayAmplitude and SwayAmplitudeFor code re-use
     {
@@ -128,6 +130,22 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
     public override CompAmmoUser CompAmmo => base.CompAmmo;
 
     public override ThingDef Projectile => CompAmmo?.CurrentAmmo != null ? CompAmmo.CurAmmoProjectile : base.Projectile;
+
+    public override float ShotHeight
+    {
+        get
+        {
+            if (projectilePropsCE.isInstant && projectilePropsCE.flyOverhead)
+            {
+                // - Set the height to be above roofs as a instant projectile with flyOverhead should bypass roofs. Think big lasers for example.
+                // - Equivelant to 7m
+                // - Use for VGE patch
+                // - see also CombatExtended.Compatibility.SOS2Compat.Verb_ShootShip_CE.ShotHeight
+                return 4f;
+            }
+            return base.ShotHeight;
+        }
+    }
 
     #endregion
 
@@ -191,15 +209,28 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
             }
         }
         float burstShotCount = VerbPropsCE.burstShotCount;
-        WeaponPlatform platform = WeaponPlatform;
-        if (platform != null && (!platform.TryGetComp<CompUnderBarrel>()?.usingUnderBarrel ?? false))
+        if (VerbPropsCE.useEquipmentStatValues && EquipmentSource != null && (!EquipmentSource.TryGetComp<CompUnderBarrel>()?.usingUnderBarrel ?? false))
         {
-            float modified = platform.GetStatValue(CE_StatDefOf.BurstShotCount);
+            float modified = EquipmentSource.GetStatValue(CE_StatDefOf.BurstShotCount);
             if (modified > 0)
             {
                 burstShotCount = modified;
             }
         }
+
+        // Apply trait-based burst count multiplier
+        if (EquipmentSource?.TryGetComp(out CompUniqueWeapon comp) ?? false)
+        {
+            foreach (WeaponTraitDef trait in comp.TraitsListForReading)
+            {
+                if (trait is CustomWeaponTraitDef { burstShotCountMultipliers: { Count: > 0 } multipliers })
+                {
+                    burstShotCount *= multipliers.RandomElement();
+                    break;
+                }
+            }
+        }
+
         return (int)burstShotCount;
     }
 
@@ -220,8 +251,8 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
             }
             if (ShooterPawn != null)
             {
-                ShooterPawn.stances.SetStance(new Stance_Warmup(aimTicks, currentTarget, this));
                 _isAiming = true;
+                ShooterPawn.stances.SetStance(new Stance_Warmup(aimTicks, currentTarget, this));
                 RecalculateWarmupTicks();
                 return;
             }
@@ -345,6 +376,10 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
     //For revolvers and break actions. Intended to be called by compammouser on reload
     public void ExternalCallDropCasing(int randomSeedOffset = -1)
     {
+        if (caster == null)
+        {
+            return;
+        }
         bool fromPawn = false;
         GunDrawExtension ext = EquipmentSource?.def.GetModExtension<GunDrawExtension>();
         if (ShooterPawn != null)

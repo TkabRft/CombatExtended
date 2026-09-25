@@ -3,6 +3,7 @@ using Verse;
 using UnityEngine;
 using CombatExtended.Loader;
 using System.Collections.Generic;
+using System;
 
 namespace CombatExtended;
 public class Settings : ModSettings, ISettingsCE
@@ -22,16 +23,22 @@ public class Settings : ModSettings, ISettingsCE
     private bool turretsBreakShields = true;
     private bool showBackpacks = true;
     private bool showTacticalVests = true;
-    private bool genericammo = false;
+    private bool genericAmmo = false;
     private bool partialstats = true;
     private bool enableExtraEffects = true;
+    private bool realWeaponNames = true;
+    private bool requireArtilleryMarkerForOffMapArtillery = true;
 
     private bool enableArcOfFire = false;
 
     private bool enableCIWS = false;
+    private OpportunisticReloadMode opportunisticReloadMode = OpportunisticReloadMode.Any;
+    private float opportunisticReloadSafeDistance = 12.9f;
+    private int secondsAfterFightToOpportunisticReload = 5;
 
     private bool showExtraTooltips = false;
     private bool detailedMeleeTooltip = false;
+    private bool nonPlayerMeleeTooltip = false;
 
     private bool showExtraStats = false;
 
@@ -56,7 +63,7 @@ public class Settings : ModSettings, ISettingsCE
 
     public bool BipodMechanics => bipodMechanics;
 
-    public bool GenericAmmo => genericammo;
+    public bool GenericAmmo => genericAmmo;
     public bool AutoSetUp => autosetup;
     public bool ShowTaunts => showTaunts;
     public bool AllowMeleeHunting => allowMeleeHunting;
@@ -70,11 +77,17 @@ public class Settings : ModSettings, ISettingsCE
 
     public bool PartialStat => partialstats;
     public bool EnableExtraEffects => enableExtraEffects;
+    public bool RealWeaponNames => realWeaponNames;
+    public bool RequireArtilleryMarkerForOffMapArtillery => requireArtilleryMarkerForOffMapArtillery;
     public bool ShowExtraTooltips => showExtraTooltips;
     public bool DetailedMeleeTooltip => detailedMeleeTooltip;
+    public bool NonPlayerMeleeTooltip => nonPlayerMeleeTooltip;
 
     public bool ShowExtraStats => showExtraStats;
     public bool EnableCIWS => enableCIWS;
+    public OpportunisticReloadMode OpportunisticReloadMode => opportunisticReloadMode;
+    public float OpportunisticReloadSafeDistance => opportunisticReloadSafeDistance;
+    public int SecondsAfterFightToOpportunisticReload => secondsAfterFightToOpportunisticReload;
 
     public float MedicineSearchRadiusSquared => medicineSearchRadius * medicineSearchRadius;
 
@@ -177,6 +190,8 @@ public class Settings : ModSettings, ISettingsCE
 
     #region Compatibility Modsettings
     public bool patchArmorDamage = true;
+    public bool hitRandomVehicleComponents = true;
+    public bool fragmentsFromVehicles = false;
 
     #endregion
 
@@ -201,11 +216,14 @@ public class Settings : ModSettings, ISettingsCE
         Scribe_Values.Look(ref enableExtraEffects, "enableExtraEffects", true);
         Scribe_Values.Look(ref showExtraTooltips, "showExtraTooltips", false);
         Scribe_Values.Look(ref detailedMeleeTooltip, "detailedMeleeTooltip", false);
+        Scribe_Values.Look(ref nonPlayerMeleeTooltip, "nonPlayerMeleeTooltip", false);
         Scribe_Values.Look(ref enableArcOfFire, "enableArcOfFire", false);
 
         Scribe_Values.Look(ref showExtraStats, "showExtraStats", false);
         Scribe_Values.Look(ref variedHumanHeight, "variedHumanHeight", false);
         Scribe_Values.Look(ref logUnpatchedDefs, "logUnpatchedDefs", false);
+        Scribe_Values.Look(ref realWeaponNames, "realWeaponNames", true);
+        Scribe_Values.Look(ref requireArtilleryMarkerForOffMapArtillery, "requireArtilleryMarkerForOffMapArtillery", true);
 
 #if DEBUG
         // Debug settings
@@ -244,7 +262,7 @@ public class Settings : ModSettings, ISettingsCE
         Scribe_Values.Look(ref forbiddenNeolithicProjectiles, "forbiddenNeolithicProjectiles", true);
         Scribe_Values.Look(ref realisticCookOff, "realisticCookOff", true);
         Scribe_Values.Look(ref stuckArrowsAsFlecks, "stuckArrowsAsFlecks", true);
-        Scribe_Values.Look(ref genericammo, "genericAmmo", false);
+        Scribe_Values.Look(ref genericAmmo, "genericAmmo", false);
 
         Scribe_Values.Look(ref ShowTutorialPopup, "ShowTutorialPopup", true);
 
@@ -265,7 +283,18 @@ public class Settings : ModSettings, ISettingsCE
         lastAmmoSystemStatus = enableAmmoSystem;    // Store this now so we can monitor for changes
 
         Scribe_Values.Look(ref medicineSearchRadius, "medicineSearchRadius", 5f);
+
+        //OpportunisticReload
+        Scribe_Values.Look(ref opportunisticReloadMode, nameof(opportunisticReloadMode), OpportunisticReloadMode.Any);
+        Scribe_Values.Look(ref opportunisticReloadSafeDistance, nameof(opportunisticReloadSafeDistance), 12.9f);
+        Scribe_Values.Look(ref secondsAfterFightToOpportunisticReload, nameof(secondsAfterFightToOpportunisticReload), 5);
+
+        // Compatibility
+        Scribe_Values.Look(ref patchArmorDamage, "patchArmorDamage", true);
+        Scribe_Values.Look(ref hitRandomVehicleComponents, "hitRandomVehicleComponents", true);
+        Scribe_Values.Look(ref fragmentsFromVehicles, "fragmentsFromVehicles", false);
     }
+
     public void DoWindowContents(Listing_Standard list)
     {
         switch (Controller.SelectedTab)
@@ -289,7 +318,7 @@ public class Settings : ModSettings, ISettingsCE
     private void DoSettingsWindowContents_Mechanics(Listing_Standard list)
     {
 
-        Rect fullRect = list.GetRect(500f);
+        Rect fullRect = list.GetRect(600f);
         const float columnPadding = 16f;
         float columnWidth = (fullRect.width - columnPadding) / 2f;
 
@@ -310,6 +339,7 @@ public class Settings : ModSettings, ISettingsCE
         left.CheckboxLabeled("CE_Settings_EnableArcOfFire_Title".Translate(), ref enableArcOfFire, "CE_Settings_EnableArcOfFire_Desc".Translate());
         left.CheckboxLabeled("CE_Settings_EnableCIWS".Translate(), ref enableCIWS, "CE_Settings_EnableCIWS_Desc".Translate());
         left.CheckboxLabeled("CE_Settings_SuppressionCausesRunning_Title".Translate(), ref suppressionCausesRunning, "CE_Settings_SuppressionCausesRunning_Desc".Translate());
+        left.CheckboxLabeled("CE_Settings_RequireArtilleryMarkerForOffMapArtillery_Title".Translate(), ref requireArtilleryMarkerForOffMapArtillery, "CE_Settings_RequireArtilleryMarkerForOffMapArtillery_Desc".Translate());
         left.CheckboxLabeled("CE_Settings_FragmentsFromWalls_Title".Translate(), ref fragmentsFromWalls, "CE_Settings_FragmentsFromWalls_Desc".Translate());
         left.CheckboxLabeled("CE_Settings_FragmentsFromWallsReflected_Title".Translate(), ref fragmentsFromWallsReflected, "CE_Settings_FragmentsFromWallsReflected_Desc".Translate());
         left.Gap();
@@ -319,6 +349,25 @@ public class Settings : ModSettings, ISettingsCE
         left.Gap();
         left.CheckboxLabeled("CE_Settings_BipodMechanics_Title".Translate(), ref bipodMechanics, "CE_Settings_BipodMechanics_Desc".Translate());
         left.CheckboxLabeled("CE_Settings_BipodAutoSetUp_Title".Translate(), ref autosetup, "CE_Settings_BipodAutoSetUp_Desc".Translate());
+        left.GapLine();
+        if (left.ButtonTextLabeled("CE_Settings_OpportunisticReload_Title".Translate(), OpportunisticReloadModeLabel(this.OpportunisticReloadMode), anchor: TextAnchor.MiddleLeft, tooltip: "CE_Settings_OpportunisticReload_Desc".Translate()))
+        {
+            var floatMenuList = new List<FloatMenuOption>();
+            foreach (var option in Enum.GetValues(typeof(OpportunisticReloadMode)))
+            {
+                var enumOption = (OpportunisticReloadMode)option;
+                var menuOption = new FloatMenuOption(OpportunisticReloadModeLabel(enumOption), () => opportunisticReloadMode = enumOption);
+                floatMenuList.Add(menuOption);
+            }
+            Find.WindowStack.Add(new FloatMenu(floatMenuList));
+        }
+        if (OpportunisticReloadMode == OpportunisticReloadMode.Off)
+        {
+            GUI.contentColor = Color.gray;
+        }
+        opportunisticReloadSafeDistance = left.SliderLabeled("CE_Settings_OpportunisticReload_SafeDistance_Title".Translate(opportunisticReloadSafeDistance), opportunisticReloadSafeDistance, 0f, 50.9f, tooltip: "CE_Settings_OpportunisticReload_SafeDistance_Desc".Translate());
+        secondsAfterFightToOpportunisticReload = (int)left.SliderLabeled("CE_Settings_OpportunisticReload_SecondsAfterFight_Title".Translate(secondsAfterFightToOpportunisticReload), secondsAfterFightToOpportunisticReload, 0f, 60f, tooltip: "CE_Settings_OpportunisticReload_SecondsAfterFight_Desc".Translate());
+        GUI.contentColor = Color.white;
         left.End();
 
         // RIGHT COLUMN
@@ -354,7 +403,7 @@ public class Settings : ModSettings, ISettingsCE
                 list.CheckboxLabeled("CE_Settings_ForbiddenNeolithicProjectiles_Title".Translate(), ref forbiddenNeolithicProjectiles, "CE_Settings_ForbiddenNeolithicProjectiles_Desc".Translate());
             }
             list.CheckboxLabeled("CE_Settings_RealisticCookOff_Title".Translate(), ref realisticCookOff, "CE_Settings_RealisticCookOff_Desc".Translate());
-            list.CheckboxLabeled("CE_Settings_GenericAmmo".Translate(), ref genericammo, "CE_Settings_GenericAmmo_Desc".Translate());
+            list.CheckboxLabeled("CE_Settings_GenericAmmo".Translate(), ref genericAmmo, "CE_Settings_GenericAmmo_Desc".Translate());
         }
         else
         {
@@ -394,8 +443,10 @@ public class Settings : ModSettings, ISettingsCE
         list.CheckboxLabeled("CE_Settings_ShowExtraTooltips_Title".Translate(), ref showExtraTooltips, "CE_Settings_ShowExtraTooltips_Desc".Translate());
         list.CheckboxLabeled("CE_Settings_ShowExtraStats_Title".Translate(), ref showExtraStats, "CE_Settings_ShowExtraStats_Desc".Translate());
         list.CheckboxLabeled("CE_Settings_DetailedMeleeTooltip_Title".Translate(), ref detailedMeleeTooltip, "CE_Settings_DetailedMeleeTooltip_Desc".Translate());
+        list.CheckboxLabeled("CE_Settings_NonPlayerMeleeTooltip_Title".Translate(), ref nonPlayerMeleeTooltip, "CE_Settings_NonPlayerMeleeTooltip_Desc".Translate());
         list.CheckboxLabeled("CE_Settings_VariedHumanHeight_Title".Translate(), ref variedHumanHeight, "CE_Settings_VariedHumanHeight_Desc".Translate());
         list.CheckboxLabeled("CE_Settings_LogUnpatchedDefs_Title".Translate(), ref logUnpatchedDefs, "CE_Settings_LogUnpatchedDefs_Desc".Translate());
+        list.CheckboxLabeled("CE_Settings_RealWeaponNames_Title".Translate(), ref realWeaponNames, "CE_Settings_RealWeaponNames_Desc".Translate());
         list.Gap();
         list.GapLine();
         list.Gap();
@@ -512,6 +563,10 @@ public class Settings : ModSettings, ISettingsCE
         autosetup = true;
         medicineSearchRadius = 5f;
         suppressionCausesRunning = true;
+        requireArtilleryMarkerForOffMapArtillery = true;
+        opportunisticReloadMode = OpportunisticReloadMode.Any;
+        opportunisticReloadSafeDistance = 12.9f;
+        secondsAfterFightToOpportunisticReload = 5;
     }
     private void ResetToDefault_Ammo()
     {
@@ -523,7 +578,7 @@ public class Settings : ModSettings, ISettingsCE
         reuseNeolithicProjectiles = true;
         forbiddenNeolithicProjectiles = true;
         realisticCookOff = true;
-        genericammo = false;
+        genericAmmo = false;
         LastAmmoSystemStatusChanged();
 
     }
@@ -543,6 +598,7 @@ public class Settings : ModSettings, ISettingsCE
         showExtraTooltips = false;
         showExtraStats = false;
         detailedMeleeTooltip = false;
+        nonPlayerMeleeTooltip = false;
         // AutoPatcher Settings
         debugAutopatcherLogger = false;
         enableApparelAutopatcher = false;
@@ -552,6 +608,7 @@ public class Settings : ModSettings, ISettingsCE
         enablePawnKindAutopatcher = true;
         variedHumanHeight = false;
         logUnpatchedDefs = false;
+        realWeaponNames = true;
 
 #if DEBUG
         debuggingMode = false;
@@ -568,6 +625,10 @@ public class Settings : ModSettings, ISettingsCE
         debugDisplayCellCoverRating = false;
         debugWorldShellingDamageRandomness = false;
 #endif
+        // Compatibility Settings
+        patchArmorDamage = true;
+        hitRandomVehicleComponents = true;
+        fragmentsFromVehicles = false;
     }
     #endregion
 
@@ -600,6 +661,21 @@ public class Settings : ModSettings, ISettingsCE
             _dirtyTabs.Remove(tabIndex);
         }
         return height;
+    }
+
+    private string OpportunisticReloadModeLabel(OpportunisticReloadMode mode)
+    {
+        switch (mode)
+        {
+            case OpportunisticReloadMode.Off:
+                return "CE_Settings_OpportunisticReload_Off".Translate();
+            case OpportunisticReloadMode.DraftedOnly:
+                return "CE_Settings_OpportunisticReload_DraftedOnly".Translate();
+            case OpportunisticReloadMode.Any:
+                return "CE_Settings_OpportunisticReload_Any".Translate();
+            default:
+                return "";
+        }
     }
 
     #endregion
