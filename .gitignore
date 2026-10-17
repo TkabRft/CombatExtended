@@ -27,3 +27,6 @@ UnityEngine.dll
 __pycache__
 ModPatches/*/Assemblies/
 .vs/
+
+# Local game-ready package
+/Release/

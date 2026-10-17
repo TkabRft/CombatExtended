@@ -54,3 +54,17 @@ The repository for it is <https://github.com/CombatExtended-Continued/CE-AutoIns
 ## Other options
 
 If you have a build system not listed here, please document how to use it.
+
+## Local workspace release folder
+
+`Release/CombatExtended/` is the local game-ready copy. Copy that inner `CombatExtended` folder directly into RimWorld's `Mods` directory. The repository's `/Release/` directory is ignored by Git.
+
+Build the current source from the workspace root before refreshing the copy:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File Custom/Scripts/Build.ps1 -Target CombatExtended
+```
+
+The package contains `About`, `Assemblies`, `Defs`, `Languages`, `Patches`, `Royalty`, `Ideology`, `Biotech`, `Anomaly`, `Odyssey`, `Sounds`, `Textures`, `ModPatches`, and `LoadFolders.xml`. Keep the compiled compatibility assemblies inside their respective `ModPatches` folders, including the Multiplayer API DLL. Language name-bank text files are runtime assets and must also be included.
+
+Exclude `Source`, Git and IDE data, build scripts, developer documentation, debug symbols, disabled example files, and placeholder files. Exclude `Assemblies/CombatExtendedLoader.dll`, following the upstream release workflow. The package is a snapshot; source changes and later builds do not refresh it automatically. Creating it does not install the mod or change saves or configuration.
