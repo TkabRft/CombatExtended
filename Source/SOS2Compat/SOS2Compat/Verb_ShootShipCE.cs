@@ -72,9 +72,7 @@ public class Verb_ShootShipCE : Verb_ShootCE
         if (GroundDefenseMode) // Modified to use ShipProjectileCE. (Special projectile that wont explode on roof hit/has different drawing)
         {
             Retarget();
-            repeating = true;
             doRetarget = true;
-            storedShotReduction = null;
             var props = VerbPropsCE;
             var midBurst = numShotsFired > 0;
             var suppressing = CompFireModes?.CurrentAimMode == AimMode.SuppressFire;
@@ -103,11 +101,13 @@ public class Verb_ShootShipCE : Verb_ShootCE
                 {
                     if (props.interruptibleBurst && !suppressing) // Case 2, 6
                     {
+                        CancelSubsequentShotWarmup();
                         return false;
                     }
                     // Case 3, 7
                     if (lastShootLine == null)
                     {
+                        CancelSubsequentShotWarmup();
                         return false;
                     }
                     shootLine = (ShootLine)lastShootLine;
@@ -123,11 +123,13 @@ public class Verb_ShootShipCE : Verb_ShootCE
                         }
                         else
                         {
+                            CancelSubsequentShotWarmup();
                             return false;
                         }
                     }
                     else
                     {
+                        CancelSubsequentShotWarmup();
                         return false;
                     }
                 }
@@ -135,6 +137,7 @@ public class Verb_ShootShipCE : Verb_ShootCE
             if (projectilePropsCE.pelletCount < 1)
             {
                 Log.Error(EquipmentSource.LabelCap + " tried firing with pelletCount less than 1.");
+                CancelSubsequentShotWarmup();
                 return false;
             }
             bool instant = false;
@@ -197,6 +200,7 @@ public class Verb_ShootShipCE : Verb_ShootCE
                     if (shipProjectile == null)
                     {
                         Log.Error("Ship Projectile cast failed");
+                        CancelSubsequentShotWarmup();
                         return false;
                     }
                     shipProjectile.Launch(
@@ -209,6 +213,7 @@ public class Verb_ShootShipCE : Verb_ShootCE
                         EquipmentSource,
                         distance);
                 }
+                NotifySubsequentShotFired(!pelletMechanicsOnly);
                 pelletMechanicsOnly = true;
             }
 

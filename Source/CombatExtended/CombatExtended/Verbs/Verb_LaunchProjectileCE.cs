@@ -54,6 +54,8 @@ public class Verb_LaunchProjectileCE : Verb
     protected float lastShotRotation;
     protected float lastRecoilDeg;
     protected float? storedShotReduction = null;
+    internal readonly SubsequentShotState subsequentShotState = new SubsequentShotState();
+    private float pendingShotRecoil;
     protected ShootLine? lastShootLine;
     protected bool repeating = false;
     protected bool doRetarget = true;
@@ -266,6 +268,8 @@ public class Verb_LaunchProjectileCE : Verb
         repeating = false;
         storedShotReduction = null;
         lastRecoilDeg = 0;
+        subsequentShotState.Reset();
+        pendingShotRecoil = 0;
         didRetarget = false;
     }
 
@@ -280,6 +284,15 @@ public class Verb_LaunchProjectileCE : Verb
         Scribe_Values.Look<float>(ref this.lastShotRotation, "lastShotRotation", 0f, false);
         Scribe_Values.Look<float>(ref this.lastRecoilDeg, "lastRecoilDeg", 0f, false);
 
+        if (Scribe.mode == LoadSaveMode.PostLoadInit)
+        {
+            // Keep the loaded stance/turret warmup, but rebuild transient burst history.
+            repeating = false;
+            storedShotReduction = null;
+            lastRecoilDeg = 0;
+            pendingShotRecoil = 0;
+            subsequentShotState.Reset();
+        }
     }
 
     public override bool Available()
@@ -636,7 +649,8 @@ public class Verb_LaunchProjectileCE : Verb
         rotation += recoilMagnitude * Rand.Range(minX, maxX);
         var trd = Rand.Range(minY, maxY);
         angle += recoilMagnitude * Mathf.Deg2Rad * trd;
-        lastRecoilDeg += nextRecoilMagnitude * recoil; //always store non-randomized max recoil for subsequent shot purposes
+        // Only record deterministic recoil once the projectile has actually fired.
+        pendingShotRecoil = nextRecoilMagnitude * recoil;
     }
 
     /// <summary>
@@ -1042,6 +1056,10 @@ public class Verb_LaunchProjectileCE : Verb
                 this.RecalculateWarmupTicks();
             }
         }
+        else
+        {
+            CancelSubsequentShotWarmup();
+        }
         return startedCasting;
     }
 
@@ -1100,9 +1118,7 @@ public class Verb_LaunchProjectileCE : Verb
     public override bool TryCastShot()
     {
         didRetarget = Retarget();
-        repeating = true;
         doRetarget = true;
-        storedShotReduction = null;
         var props = VerbPropsCE;
         var midBurst = numShotsFired > 0;
         var suppressing = CompFireModes?.CurrentAimMode == AimMode.SuppressFire;
@@ -1120,11 +1136,13 @@ public class Verb_LaunchProjectileCE : Verb
         }
         else if (!KeepBurstOnNoShootLine(suppressing, out shootLine))// Case 2. We cannot hit the current target, check if we should continue shooting
         {
+            CancelSubsequentShotWarmup();
             return false;
         }
         if (projectilePropsCE.pelletCount < 1)
         {
             Log.Error(EquipmentSource.LabelCap + " tried firing with pelletCount less than 1.");
+            CancelSubsequentShotWarmup();
             return false;
         }
         bool instant = false;
@@ -1212,6 +1230,7 @@ public class Verb_LaunchProjectileCE : Verb
                     EquipmentSource,
                     distance);
             }
+            NotifySubsequentShotFired(!pelletMechanicsOnly);
             pelletMechanicsOnly = true;
         }
 
@@ -1237,6 +1256,26 @@ public class Verb_LaunchProjectileCE : Verb
 
         return true;
     }
+
+    // Shared with compatibility verbs that implement their own projectile loop.
+    protected void CancelSubsequentShotWarmup()
+    {
+        subsequentShotState.CancelWarmup();
+        pendingShotRecoil = 0;
+    }
+
+    protected void NotifySubsequentShotFired(bool firstPellet)
+    {
+        if (!subsequentShotState.RecordShot(numShotsFired == 0, pendingShotRecoil,
+            Controller.settings.FasterRepeatShots, CompAmmo?.HasMagazine != false, firstPellet))
+        {
+            return;
+        }
+        lastRecoilDeg = subsequentShotState.BurstRecoil;
+        storedShotReduction = subsequentShotState.HasPreviousShot ? subsequentShotState.PreviousMultiplier : null;
+        repeating = true;
+    }
+
     protected virtual ProjectileCE SpawnProjectile()
     {
         return (ProjectileCE)ThingMaker.MakeThing(Projectile, null);

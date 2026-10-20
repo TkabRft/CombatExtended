@@ -388,8 +388,8 @@ public class Settings : ModSettings, ISettingsCE
         right.Gap();
         medicineSearchRadius = right.SliderLabeled("CE_Settings_MedicineSearchRadius_Title".Translate() + ": " + medicineSearchRadius.ToString("F0"), medicineSearchRadius, 1f, 100f, tooltip: "CE_Settings_MedicineSearchRadius_Desc".Translate(), labelPct: 0.6f);
         right.GapLine();
-        left.CheckboxLabeled("CE_Settings_FasterRepeatShots_Title".Translate(), ref fasterRepeatShots, "CE_Settings_FasterRepeatShots_Desc".Translate());
-        fasterRepeatShotsRecoilMult = left.SliderLabeled("CE_Settings_FasterRepeatShotsMultiplier_Title".Translate() + ": " + fasterRepeatShotsRecoilMult.ToString("F1"), fasterRepeatShotsRecoilMult, 0.1f, 3f, tooltip: "CE_Settings_FasterRepeatShotsMultiplier_Desc".Translate(), labelPct: 0.6f);
+        right.CheckboxLabeled("CE_Settings_FasterRepeatShots_Title".Translate(), ref fasterRepeatShots, "CE_Settings_FasterRepeatShots_Desc".Translate());
+        fasterRepeatShotsRecoilMult = right.SliderLabeled("CE_Settings_FasterRepeatShotsMultiplier_Title".Translate() + ": " + fasterRepeatShotsRecoilMult.ToString("F1"), fasterRepeatShotsRecoilMult, 0.1f, 3f, tooltip: "CE_Settings_FasterRepeatShotsMultiplier_Desc".Translate(), labelPct: 0.6f);
         right.End();
     }
 

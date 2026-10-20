@@ -5,6 +5,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
+using CombatExtended.Utilities;
 
 namespace CombatExtended;
 public class Verb_ShootCE : Verb_LaunchProjectileCE
@@ -348,7 +349,13 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
 
     public override void RecalculateWarmupTicks()
     {
-        if (!Controller.settings.FasterRepeatShots || compAmmo?.HasMagazine == false)
+        if (!subsequentShotState.CanReduceWarmup(Controller.settings.FasterRepeatShots, CompAmmo?.HasMagazine != false))
+        {
+            storedShotReduction = null;
+            lastRecoilDeg = 0;
+            return;
+        }
+        if (BurstWarmupTicksLeft <= 0)
         {
             return;
         }
@@ -361,32 +368,22 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
 
         var d = v - u;
         var newShotRotation = (-90 + Mathf.Rad2Deg * Mathf.Atan2(d.z, d.x)) % 360;
-        var delta = Mathf.Abs(newShotRotation - lastShotRotation);
+        float delta = SubsequentShotState.AngleDifference(lastShotRotation, newShotRotation);
 
         float maxReduction = CompFireModes?.CurrentAimMode == AimMode.SuppressFire ? 0.1f : _isAiming ? 0.5f : 0.25f;
 
         //how easy it is to turn the weapon around depending on heaviness, angle and weapon handling
-        float relativeWeaponMass = EquipmentSource.GetStatValue(StatDefOf.Mass) / (ShooterPawn?.BodySize ?? 1f);
-        float angleFactor = Mathf.Max(0, ((delta % 180) / SubsequentShotMassCurve.Evaluate(relativeWeaponMass) / (1 + ShootingAccuracy / 9f)) - 1f);
+        float relativeWeaponMass = (EquipmentSource?.GetStatValue(StatDefOf.Mass) ?? 0f) / (ShooterPawn?.BodySize ?? 1f);
+        float angleFactor = Mathf.Max(0, (delta / SubsequentShotMassCurve.Evaluate(relativeWeaponMass) / (1 + ShootingAccuracy / 9f)) - 1f);
 
         //how easy it is to control vertical recoil
         float recoilFactor = SubsequentShotRecoilCurve.Evaluate(lastRecoilDeg) * Controller.settings.FasterRepeatShotsRecoilMult;
 
-        //current reduction after pawn stats
-        float reduction = angleFactor + recoilFactor;
-
-        if (storedShotReduction != null)
-        {
-            reduction *= (float)storedShotReduction;
-        }
-
-        reduction = Mathf.Max(maxReduction, reduction);
+        float reduction = subsequentShotState.GetWarmupMultiplier(angleFactor, recoilFactor, maxReduction);
         if (Controller.settings.DebugSubsequentShotLogging)
         {
             Log.Message($"{caster?.LabelShort} ({EquipmentSource?.LabelShort}) SS:\nreduction {reduction}; storedShotReduction {storedShotReduction}; maxReduction {maxReduction}; lastRecoilDeg {lastRecoilDeg}; angle factor {angleFactor}; recoil factor {recoilFactor}");
         }
-
-        storedShotReduction = Mathf.Clamp01(reduction);
 
         if (reduction < 1.0f)
         {
@@ -416,6 +413,7 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
     {
         if (!CompAmmo?.TryPrepareShot() ?? false)
         {
+            CancelSubsequentShotWarmup();
             return false;
         }
         if (base.TryCastShot())
