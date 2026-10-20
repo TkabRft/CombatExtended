@@ -14,5 +14,6 @@
         <Compile Include="..\CombatExtended\Harmony\Harmony_LordToil_Siege_Builders.cs" Link="SiegeBuilders\Harmony_LordToil_Siege_Builders.cs" />
         <Compile Include="..\CombatExtended\Utilities\SubsequentShotState.cs" Link="SubsequentShots\SubsequentShotState.cs" />
         <Compile Include="..\CombatExtended\Utilities\MeleeStatMath.cs" Link="MeleeStats\MeleeStatMath.cs" />
+        <Compile Include="..\CombatExtended\Utilities\BipodVerbState.cs" Link="Bipods\BipodVerbState.cs" />
     </ItemGroup>
 </Project>

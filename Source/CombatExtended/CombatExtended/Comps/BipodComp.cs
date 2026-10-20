@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using CombatExtended.Utilities;
 using RimWorld;
 using Verse;
 using Verse.AI;
@@ -15,6 +16,7 @@ public class BipodComp : CompRangedGizmoGiver
     public bool IsSetUpRn;
 
     private int starts = 5;
+    private readonly BipodVerbState<VerbPropertiesCE> verbState = new(props => (VerbPropertiesCE)props.MemberwiseClone());
 
     #endregion
 
@@ -25,8 +27,11 @@ public class BipodComp : CompRangedGizmoGiver
         {
             if (Controller.settings.AutoSetUp && compFireMode != null)
             {
-                Pawn pawn = ((Pawn_EquipmentTracker)this.ParentHolder).pawn;
-                return (((compFireMode.CurrentAimMode == Props.catDef.autosetMode) | (!Props.catDef.useAutoSetMode && compFireMode.CurrentAimMode != AimMode.Snapshot)) && !IsSetUpRn && !pawn.IsCarryingPawn());
+                Pawn pawn = (this.ParentHolder as Pawn_EquipmentTracker)?.pawn;
+                bool matchesMode = Props.catDef?.useAutoSetMode == true
+                    ? compFireMode.CurrentAimMode == Props.catDef.autosetMode
+                    : compFireMode.CurrentAimMode != AimMode.Snapshot;
+                return matchesMode && !IsSetUpRn && pawn != null && !pawn.IsCarryingPawn();
             }
             return ShouldSetUpint && !IsSetUpRn;
         }
@@ -39,7 +44,14 @@ public class BipodComp : CompRangedGizmoGiver
     {
         base.PostSpawnSetup(respawningAfterLoad);
         compFireMode = this.parent.TryGetComp<CompFireModes>();
-        SetUpInvert(this.parent);
+        if (respawningAfterLoad && IsSetUpRn)
+        {
+            SetupFromLoad();
+        }
+        else
+        {
+            SetUpInvert(this.parent);
+        }
     }
 
     public override void PostExposeData()
@@ -49,17 +61,13 @@ public class BipodComp : CompRangedGizmoGiver
         {
             compFireMode = this.parent.TryGetComp<CompFireModes>();
 
-            if (Controller.settings.BipodMechanics && compFireMode != null)
+            if (IsSetUpRn)
             {
-
-                if (IsSetUpRn)
-                {
-                    SetupFromLoad();
-                }
-                else
-                {
-                    SetUpInvert(this.parent);
-                }
+                SetupFromLoad();
+            }
+            else
+            {
+                SetUpInvert(this.parent);
             }
         }
         base.PostExposeData();
@@ -126,11 +134,18 @@ public class BipodComp : CompRangedGizmoGiver
         ResetVerbProps(this.parent);
     }
 
+    public override void Notify_Equipped(Pawn pawn)
+    {
+        base.Notify_Equipped(pawn);
+        compFireMode = this.parent.TryGetComp<CompFireModes>();
+        SetUpInvert(this.parent);
+    }
+
     public CompProperties_BipodComp Props => (CompProperties_BipodComp)this.props;
 
     public VerbPropertiesCE CopyVerbPropsFromThing(Thing source)
     {
-        return (VerbPropertiesCE)source.TryGetComp<CompEquippable>().PrimaryVerb.verbProps.MemberwiseClone();
+        return (VerbPropertiesCE)(source?.TryGetComp<CompEquippable>()?.PrimaryVerb?.verbProps as VerbPropertiesCE)?.MemberwiseClone();
     }
 
     public void AssignVerbProps(Thing target, VerbPropertiesCE props)
@@ -140,45 +155,63 @@ public class BipodComp : CompRangedGizmoGiver
 
     public void ResetVerbProps(Thing source)
     {
-        var VerbPropsCloneDef = (VerbPropertiesCE)source.def.verbs.Find(x => x is VerbPropertiesCE).MemberwiseClone();
+        ApplyState(source, false);
+    }
 
-        AssignVerbProps(target: source, props: VerbPropsCloneDef);
+    internal VerbPropertiesCE CopyBaselineVerbProps()
+    {
+        return verbState.CopyBaseline(this.parent.TryGetComp<CompEquippable>()?.PrimaryVerb?.verbProps as VerbPropertiesCE);
+    }
+
+    internal static BipodValues ValuesFor(VerbPropertiesCE baseline, CompProperties_BipodComp props, bool deployed)
+    {
+        return new BipodValues(baseline.range, baseline.recoilAmount, baseline.warmupTime).Modified(
+            deployed ? props.additionalrange : 0f,
+            deployed ? props.recoilMulton : props.recoilMultoff,
+            deployed ? props.warmupMult : props.warmupPenalty);
+    }
+
+    private void ApplyState(Thing source, bool applyModifiers)
+    {
+        var verb = source?.TryGetComp<CompEquippable>()?.PrimaryVerb;
+        if (verb?.verbProps is not VerbPropertiesCE current)
+        {
+            return;
+        }
+        var changed = verbState.Apply(current, copy =>
+        {
+            if (applyModifiers)
+            {
+                BipodValues values = ValuesFor(copy, Props, IsSetUpRn);
+                copy.range = values.Range;
+                copy.recoilAmount = values.Recoil;
+                copy.warmupTime = values.Warmup;
+            }
+        });
+        AssignVerbProps(source, changed);
     }
 
     public void SetUpInvert(Thing source)
     {
-        ResetVerbProps(source: source);
-
         IsSetUpRn = false;
-
-        var changed = CopyVerbPropsFromThing(source);
-
-        changed.recoilAmount *= Props.recoilMultoff;
-
-        changed.warmupTime *= Props.warmupPenalty;
-
-        AssignVerbProps(source, changed);
+        ApplyState(source, Controller.settings.BipodMechanics);
     }
 
     public void SetUpEnd(Thing source, Pawn pawn)
     {
-        var changed = CopyVerbPropsFromThing(source);
-
-        changed.range += Props.additionalrange;
-
-        changed.recoilAmount *= Props.recoilMulton;
-
-        changed.warmupTime *= Props.warmupMult;
-
         IsSetUpRn = true;
-
-        AssignVerbProps(source, changed);
+        ApplyState(source, Controller.settings.BipodMechanics);
 
         CE_SoundDefOf.Interact_Bipod.PlayOneShot(new TargetInfo(source.PositionHeld, pawn.Map));
     }
 
     public void SetUpStart(Pawn pawn = null)
     {
+        var current = this.parent.TryGetComp<CompEquippable>()?.PrimaryVerb?.verbProps as VerbPropertiesCE;
+        if (!verbState.Owns(current))
+        {
+            ApplyState(this.parent, Controller.settings.BipodMechanics);
+        }
         if (!(pawn?.Drafted ?? false))
         {
             return;
@@ -204,11 +237,7 @@ public class BipodComp : CompRangedGizmoGiver
 
     public void SetupFromLoad()
     {
-        VerbPropertiesCE changed = CopyVerbPropsFromThing(this.parent);
-        changed.range += Props.additionalrange;
-        changed.recoilAmount *= Props.recoilMulton * Props.recoilMultoff;
-        changed.warmupTime *= Props.warmupMult * Props.warmupPenalty;
-        AssignVerbProps(this.parent, changed);
+        ApplyState(this.parent, Controller.settings.BipodMechanics);
     }
     #endregion
 
