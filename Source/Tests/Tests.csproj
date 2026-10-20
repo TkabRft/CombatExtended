@@ -9,4 +9,8 @@
         <PackageReference Include="xunit.v3" Version="3.2.1" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
     </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\CombatExtended\Harmony\Harmony_LordToil_Siege_Builders.cs" Link="SiegeBuilders\Harmony_LordToil_Siege_Builders.cs" />
+    </ItemGroup>
 </Project>
