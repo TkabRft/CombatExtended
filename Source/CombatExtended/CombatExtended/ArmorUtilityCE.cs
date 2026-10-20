@@ -360,19 +360,10 @@ public static class ArmorUtilityCE
                     {
                         armorDamage = armor.GetStatValue(StatDefOf.Flammability, true) * dmgAmount;
                     }
-                    else
+                    // Zero armor is valid for utility apparel; either zero value skips the ratio calculation.
+                    else if (penAmount != 0 && armorAmount != 0)
                     {
-                        if (penAmount == 0 || armorAmount == 0)
-                        {
-                            if (armor.GetStatValue(StatDefOf.ArmorRating_Sharp) == 0 && armor.GetStatValue(StatDefOf.ArmorRating_Blunt) == 0 && armor.GetStatValue(StatDefOf.ArmorRating_Heat) == 0)
-                            {
-                                Log.ErrorOnce($"penAmount or armorAmount are zero for {def.armorCategory} on {armor}", armor.def.GetHashCode() + 846532021);
-                            }
-                        }
-                        else
-                        {
-                            armorDamage = (dmgAmount - newDmgAmount) * Mathf.Min(1.0f, (penAmount * penAmount) / (armorAmount * armorAmount)) + newDmgAmount * Mathf.Clamp01(armorAmount / penAmount);
-                        }
+                        armorDamage = (dmgAmount - newDmgAmount) * Mathf.Min(1.0f, (penAmount * penAmount) / (armorAmount * armorAmount)) + newDmgAmount * Mathf.Clamp01(armorAmount / penAmount);
                     }
                     armorDamage *= HardArmorDamageFactor;
                 }
