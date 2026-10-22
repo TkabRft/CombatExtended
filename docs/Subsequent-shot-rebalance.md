@@ -1,6 +1,6 @@
 # Subsequent-shot rebalance
 
-code-synced: 2026-10-20
+code-synced: 2026-10-22
 
 Status: implemented.
 
@@ -14,6 +14,10 @@ The two curves in [`SubsequentShotCurve.xml`](../Defs/GameSetupSteps/SubsequentS
 
 - The mass curve supplies a turning threshold from loaded weapon mass divided by shooter body size. Higher weapon handling increases this threshold. Equipment-less ability verbs use zero equipment mass; an absent pawn uses body size one.
 - The recoil curve supplies the vertical recovery factor from deterministic recoil accumulated during the preceding burst. The difficulty setting multiplies this factor. Random recoil still affects projectile trajectories, but does not randomize this warmup factor.
+
+The recovery sample now uses the uncapped positive-tail handling calculation and expert-control factor described in [Targeting, tracking, and accuracy](Targeting-and-accuracy.md). Handling through the unmodified skill-20 baseline of 287.5% retains its previous recoil magnitude; higher handling reduces it progressively for all weapons. The additional aiming phase also shortens with handling and aiming accuracy beyond their unmodified expert baselines, before this feature applies its existing phase multiplier. Per-round target tracking and its optional speed limit are separate from this between-burst warmup calculation.
+
+Bounded retargeting preserves the same burst's recoil progression and committed recovery history. Reaction-based early stopping cancels only pending warmup bookkeeping and adds no recoil sample for the un-emitted round. Its preflight runs before ammunition preparation; the normal burst completion/cooldown path remains responsible for ending the burst. See the burst-control section of [Targeting, tracking, and accuracy](Targeting-and-accuracy.md) for the skill/consciousness model, independent settings, and playtest limits.
 
 Turning uses the shortest absolute angular difference, between zero and 180 degrees. A reversal therefore remains 180 degrees, and a turn from 89 to -269 degrees is two degrees.
 
