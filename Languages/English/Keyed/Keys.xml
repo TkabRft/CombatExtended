@@ -46,6 +46,9 @@
 	<CE_TargetWidth>Target width</CE_TargetWidth>
 
 	<CE_EstimatedHitChance>Estimated hit chance</CE_EstimatedHitChance>
+	<CE_EstimatedBurstHitChance>Estimated burst hit chance</CE_EstimatedBurstHitChance>
+	<CE_BurstHitChanceExplanation>Average fraction of rounds hitting this target, assuming its current movement and cover continue. This is not the chance of at least one hit.</CE_BurstHitChanceExplanation>
+	<CE_BurstHitChanceUnavailable>Unavailable for this trajectory</CE_BurstHitChanceUnavailable>
 	<CE_AccuracyCurveExplanation>Accuracy conversion: diminishing returns, with continued gains beyond the original curve.</CE_AccuracyCurveExplanation>
 
 	<!-- Melee attack tooltip -->

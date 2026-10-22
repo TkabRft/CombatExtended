@@ -14,6 +14,7 @@
         <Compile Include="..\CombatExtended\Utilities\AccuracyMath.cs" Link="Accuracy\AccuracyMath.cs" />
         <Compile Include="..\CombatExtended\Utilities\BurstTrackingState.cs" Link="Accuracy\BurstTrackingState.cs" />
         <Compile Include="..\CombatExtended\Utilities\ShotGeometry.cs" Link="Accuracy\ShotGeometry.cs" />
+        <Compile Include="..\CombatExtended\Utilities\BurstHitEstimator.cs" Link="Accuracy\BurstHitEstimator.cs" />
         <Compile Include="..\CombatExtended\CombatExtended\StatParts\StatPart_UncappedAccuracyCurve.cs" Link="Accuracy\StatPart_UncappedAccuracyCurve.cs" />
         <Compile Include="..\CombatExtended\Harmony\Harmony_LordToil_Siege_Builders.cs" Link="SiegeBuilders\Harmony_LordToil_Siege_Builders.cs" />
         <Compile Include="..\CombatExtended\Utilities\SubsequentShotState.cs" Link="SubsequentShots\SubsequentShotState.cs" />

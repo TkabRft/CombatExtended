@@ -15,10 +15,16 @@ public class ShiftVecReport
     public GlobalTargetInfo globalTarget = GlobalTargetInfo.Invalid;
 
     private string hitChance = "";
+    internal Func<float?> burstEstimate;
     public string HitChance
     {
         get
         {
+            if (burstEstimate != null)
+            {
+                float? probability = burstEstimate();
+                return probability.HasValue ? GenText.ToStringByStyle(probability.Value * 100, ToStringStyle.FloatTwo) : "-";
+            }
             if (hitChance == "")
             {
                 if (target.Thing is null)
@@ -346,7 +352,10 @@ public class ShiftVecReport
             }
             PlayerKnowledgeDatabase.KnowledgeDemonstrated(CE_ConceptDefOf.CE_AimingSystem, KnowledgeAmount.FrameDisplayed); // Show we learned about the aiming system
         }
-        stringBuilder.AppendLine("   " + "CE_EstimatedHitChance".Translate() + "\t" + HitChance + "%");
+        string estimate = HitChance;
+        stringBuilder.AppendLine("   " + (burstEstimate == null ? "CE_EstimatedHitChance" : "CE_EstimatedBurstHitChance").Translate()
+            + "\t" + (estimate == "-" ? "CE_BurstHitChanceUnavailable".Translate().ToString() : estimate + "%"));
+        if (burstEstimate != null) stringBuilder.AppendLine("   " + "CE_BurstHitChanceExplanation".Translate());
         return stringBuilder.ToString();
     }
 }

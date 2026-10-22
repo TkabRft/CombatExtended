@@ -74,7 +74,7 @@ internal static class Harmony_Verb_TryCastNextBurstShot
         }
     }
 
-    private static int GetTicksBetweenBurstShots(Verb verb)
+    internal static int GetTicksBetweenBurstShots(Verb verb)
     {
         float ticksBetweenBurstShots = verb.verbProps.ticksBetweenBurstShots;
         if (verb is Verb_LaunchProjectileCE && verb.verbProps is VerbPropertiesCE verbPropsCE && verbPropsCE.useEquipmentStatValues && verb.EquipmentSource != null)

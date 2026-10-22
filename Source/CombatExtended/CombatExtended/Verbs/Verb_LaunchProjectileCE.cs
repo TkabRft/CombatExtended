@@ -725,6 +725,9 @@ public partial class Verb_LaunchProjectileCE : Verb
         report.smokeDensity = ignoreMalusesFlag ? 0 : smokeDensity;
         report.roofed = roofed;
 
+        if (this is Verb_ShootCE && this is not Verb_ShootMortarCE && this is not VerbCIWS && !projectilePropsCE.flyOverhead)
+            report.burstEstimate = () => EstimateBurst(target, report);
+
         return report;
     }
 
