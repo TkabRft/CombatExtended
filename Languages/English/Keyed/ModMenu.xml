@@ -116,6 +116,8 @@
 
 	<CE_Settings_FasterRepeatShots_Desc>When enabled, subsequent shots at the same, or nearby, targets are faster.</CE_Settings_FasterRepeatShots_Desc>
 	<CE_Settings_FasterRepeatShots_Title>Faster subsequent shots</CE_Settings_FasterRepeatShots_Title>
+	<CE_Settings_LimitTrackingSpeed_Title>Limit tracking speed</CE_Settings_LimitTrackingSpeed_Title>
+	<CE_Settings_LimitTrackingSpeed_Desc>During a burst, shooters turn toward moving or newly selected targets at a limited speed. Weapon handling and carry weight improve tracking; heavier loaded weapons slow it. Disable to fully re-aim each round. Weapon spread is unchanged.</CE_Settings_LimitTrackingSpeed_Desc>
 
 	<CE_Settings_MidBurstRetarget_Desc>When enabled, shooters will switch to a new target when their primary target is downed mid-burst.</CE_Settings_MidBurstRetarget_Desc>
 	<CE_Settings_MidBurstRetarget_Title>Retarget mid burst</CE_Settings_MidBurstRetarget_Title>

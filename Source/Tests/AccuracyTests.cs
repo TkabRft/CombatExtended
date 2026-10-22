@@ -110,6 +110,128 @@ public class AccuracyTests
         Assert.Equal(AccuracyMath.RangeAccuracy(10, 1) / 2, AccuracyMath.RangeAccuracy(10, 2));
     }
 
+    [Fact]
+    public void StrengthOffsetsMassAndDoesNotUseInventorySpace()
+    {
+        Assert.Equal(60, BurstTrackingState.Speed(2.5, 4, 40));
+        Assert.Equal(60, BurstTrackingState.Speed(2.5, 16, 160));
+        Assert.Equal(30, BurstTrackingState.Speed(2.5, 16, 40));
+        Assert.Equal(120, BurstTrackingState.Speed(5, 4, 40));
+    }
+
+    [Fact]
+    public void TrackingUsesElapsedTicksAndShortestAnglesOnBothAxes()
+    {
+        var state = new BurstTrackingState();
+        state.Advance(359, 359, 100, 60, true);
+        state.Advance(10, 10, 101, 60, true);
+        Assert.Equal(360, state.Rotation); Assert.Equal(360, state.Elevation);
+        state.Advance(-10, -10, 105, 60, true);
+        Assert.Equal(356, state.Rotation); Assert.Equal(356, state.Elevation);
+        state.Advance(90, 45, 105, 60, true); // another pellet cannot advance time
+        Assert.Equal(356, state.Rotation);
+        state.Advance(90, 45, 106, 60, false);
+        Assert.Equal(90, state.Rotation); Assert.Equal(45, state.Elevation);
+        state.Reset();
+        state.Advance(-170, 20, 1, 1, true);
+        Assert.Equal(-170, state.Rotation); Assert.Equal(20, state.Elevation);
+    }
+
+    [Theory]
+    [InlineData(3, 0)] [InlineData(0, 3)] [InlineData(0, -3)] [InlineData(-3, 0)]
+    public void LeadingUsesCurrentPositionAndMovement(double x, double z)
+    {
+        var source = new ShotVector();
+        var position = new ShotVector(0, 0, 30);
+        var lead = ShotGeometry.Lead(source, position, new ShotVector(x, 0, z), 100);
+        Assert.Equal(Math.Sign(x), Math.Sign(lead.X));
+        Assert.Equal(Math.Sign(z), Math.Sign(lead.Z));
+        var nearer = ShotGeometry.Lead(source, new ShotVector(0, 0, 10), new ShotVector(x, 0, z), 100);
+        Assert.True(nearer.Horizontal < lead.Horizontal);
+    }
+
+    [Theory]
+    [InlineData(1, 0)] [InlineData(-1, 0)] [InlineData(0, 1)] [InlineData(0, -1)]
+    [InlineData(1, 1)] [InlineData(-1, 1)] [InlineData(1, -1)] [InlineData(-1, -1)]
+    public void MovementUsesActualStepTimingInEveryDirection(int x, int z)
+    {
+        double stepLength = Math.Sqrt(x * x + z * z);
+        var velocity = ShotGeometry.StepVelocity(new(x, 0, z), 15 * stepLength, true);
+        Assert.Equal(4, velocity.Horizontal, 10);
+        Assert.Equal(Math.Sign(x), Math.Sign(velocity.X));
+        Assert.Equal(Math.Sign(z), Math.Sign(velocity.Z));
+        var slow = ShotGeometry.StepVelocity(new(x, 0, z), 30 * stepLength, true);
+        Assert.Equal(2, slow.Horizontal, 10);
+        Assert.Equal(0, ShotGeometry.StepVelocity(new(x, 0, z), 15, false).Horizontal);
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(-1)] [InlineData(double.NaN)] [InlineData(double.PositiveInfinity)]
+    public void MissingStepDurationCannotCreateAnInvalidVelocity(double ticks)
+    {
+        Assert.Equal(0, ShotGeometry.StepVelocity(new(1, 0, 0), ticks, true).Horizontal);
+    }
+
+    [Theory]
+    [InlineData(8, 0)] [InlineData(-8, 0)] [InlineData(0, 8)] [InlineData(0, -8)]
+    [InlineData(6, -4)] [InlineData(-6, 4)] [InlineData(0, -20)]
+    public void PredictedInterceptMatchesProjectileAndTargetArrival(double x, double z)
+    {
+        var source = new ShotVector(125, 0.8, 90);
+        var target = new ShotVector(125, 0, 150);
+        var velocity = new ShotVector(x, 0, z);
+        var lead = ShotGeometry.Lead(source, target, velocity, 20);
+        double flightTime = (target + lead - source).Horizontal / 20;
+        Assert.InRange((lead - velocity * flightTime).Horizontal, 0, 1e-10);
+    }
+
+    [Fact]
+    public void CrossingInterceptIsSymmetricUnderMapRotation()
+    {
+        var source = new ShotVector(100, 0, 100);
+        var offset = new ShotVector(8, 0, 60);
+        var velocity = new ShotVector(6, 0, -2);
+        var initial = ShotGeometry.Lead(source, source + offset, velocity, 20);
+        for (int direction = 0; direction < 8; direction++)
+        {
+            double angle = direction * Math.PI / 4;
+            ShotVector Rotate(ShotVector vector) => new(vector.X * Math.Cos(angle) - vector.Z * Math.Sin(angle),
+                0, vector.X * Math.Sin(angle) + vector.Z * Math.Cos(angle));
+            var rotated = ShotGeometry.Lead(source, source + Rotate(offset), Rotate(velocity), 20);
+            Assert.InRange((rotated - Rotate(initial)).Horizontal, 0, 1e-10);
+        }
+    }
+
+    [Fact]
+    public void UnreachableMovingTargetsRetainFiniteForwardPrediction()
+    {
+        Assert.Equal(30, ShotGeometry.Lead(new(), new(0, 0, 30), new(0, 0, 20), 20).Z);
+        Assert.Equal(60, ShotGeometry.Lead(new(), new(0, 0, 30), new(40, 0, 0), 20).X);
+        Assert.Equal(0, ShotGeometry.Lead(new(), new(), new(1, 0, 0), 20).Horizontal);
+    }
+
+    [Theory]
+    [InlineData(false, true, false, false, true, (int)BurstSightAction.Stop)]
+    [InlineData(true, true, true, false, true, (int)BurstSightAction.Stop)]
+    [InlineData(true, true, false, false, true, (int)BurstSightAction.HoldLastPosition)]
+    [InlineData(true, true, true, true, true, (int)BurstSightAction.HoldLastPosition)]
+    [InlineData(true, false, true, true, true, (int)BurstSightAction.FollowSuppressionTarget)]
+    [InlineData(true, false, true, true, false, (int)BurstSightAction.Stop)]
+    [InlineData(true, false, false, false, true, (int)BurstSightAction.Stop)]
+    public void LostSightRetainsInterruptionAndSuppressionPolicy(bool line, bool locked, bool interruptible,
+        bool suppressing, bool valid, int expected)
+    {
+        Assert.Equal((BurstSightAction)expected, BurstTrackingState.LostSight(line, locked, interruptible, suppressing, valid));
+    }
+
+    [Fact]
+    public void RangeErrorUsesCurrentDistanceAndOneQuantile()
+    {
+        var initial = ShotGeometry.OffsetTarget(new(), new(0, 0, 20), 21, new(), new());
+        var later = ShotGeometry.OffsetTarget(new(), new(0, 0, 40), 42, new(), new());
+        Assert.Equal(21, initial.Horizontal); Assert.Equal(42, later.Horizontal);
+    }
+
     [Theory]
     [InlineData(false)] [InlineData(true)]
     public void StatMigrationPreservesMechanitorPartsAndIsIdempotent(bool otherModFirst)
@@ -157,4 +279,14 @@ public class AccuracyTests
         Assert.Equal(2, value);
     }
 
+    [Fact]
+    public void GeometryUsesTheCollisionBoxAndTheBallisticLowArc()
+    {
+        Assert.False(ShotGeometry.Intersects(new(0.3, 0.5, 0), new(0.3, 0.5, 40), new(-0.2, 0, 29.8), new(0.2, 1, 30.2)));
+        Assert.True(ShotGeometry.Intersects(new(0, 0.5, 0), new(0, 0.5, 40), new(-0.2, 0, 29.8), new(0.2, 1, 30.2)));
+        double elevation = ShotGeometry.Elevation(40, -0.3, 100, 1.962, false);
+        double time = 40 / (100 * Math.Cos(elevation));
+        Assert.Equal(-0.3, 100 * Math.Sin(elevation) * time - 1.962 * time * time / 2, 8);
+        Assert.True(double.IsNaN(ShotGeometry.Elevation(100, 1, 1, 9.81, false)));
+    }
 }

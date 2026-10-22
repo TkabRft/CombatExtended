@@ -14,13 +14,16 @@ using CombatExtended.Utilities;
 using RimWorld.Planet;
 
 namespace CombatExtended;
-public class Verb_LaunchProjectileCE : Verb
+public partial class Verb_LaunchProjectileCE : Verb
 {
 
     #region Fields
 
     // Targeting factors
-    private float estimatedTargDist = -1;           // Stores estimate target distance for each burst, so each burst shot uses the same
+    private float estimatedTargDist = -1;
+    private float rangeErrorSample;
+    private readonly BurstTrackingState burstTracking = new BurstTrackingState();
+    private bool heldBurstLine;
     protected int numShotsFired = 0;                  // Stores how many shots were fired for purposes of recoil
 
     // Angle in Vector2(degrees, radians)        
@@ -39,7 +42,6 @@ public class Verb_LaunchProjectileCE : Verb
     public CompApparelReloadable compReloadable = null;
     protected int multiBarrelIndex;
 
-    private float shotSpeed = -1;
     private float rotationDegrees = 0f;
     private float angleRadians = 0f;
 
@@ -101,23 +103,13 @@ public class Verb_LaunchProjectileCE : Verb
             return compCharges;
         }
     }
-    protected float ShotSpeed
+    protected float ShotSpeed => ShotSpeedFor(currentTarget);
+
+    private float ShotSpeedFor(LocalTargetInfo target)
     {
-        get
-        {
-            if (CompCharges != null)
-            {
-                if (CompCharges.GetChargeBracket((currentTarget.Cell - caster.Position).LengthHorizontal, ShotHeight, projectilePropsCE.GravityPerWidth, out var bracket))
-                {
-                    shotSpeed = bracket.x;
-                }
-            }
-            else
-            {
-                shotSpeed = Projectile.projectile.speed;
-            }
-            return shotSpeed;
-        }
+        if (CompCharges != null && CompCharges.GetChargeBracket((target.Cell - caster.Position).LengthHorizontal,
+            ShotHeight, projectilePropsCE.GravityPerWidth, out var bracket)) return bracket.x;
+        return Projectile.projectile.speed;
     }
     public virtual float ShotHeight => (new CollisionVertical(caster)).shotHeight;
     private Vector3 ShotSource
@@ -136,7 +128,6 @@ public class Verb_LaunchProjectileCE : Verb
         get
         {
 
-            isTurretMannable = (Caster.TryGetComp<CompMannable>() != null);
             return CasterShootingAccuracyValue(Shooter);
         }
 
@@ -230,7 +221,13 @@ public class Verb_LaunchProjectileCE : Verb
     }
 
     public bool MidBurst => numShotsFired > 0;
-    protected virtual bool LockRotationAndAngle => !didRetarget && MidBurst;
+    // Preserve the extension point and the original policy for specialized/non-pawn verbs.
+    protected virtual bool LockRotationAndAngle => heldBurstLine || (!UsesBurstTracking && !didRetarget && MidBurst);
+    protected bool UsesBurstTracking => ShooterPawn != null && this is Verb_ShootCE
+        && this is not Verb_ShootMortarCE && this is not VerbCIWS && !projectilePropsCE.flyOverhead;
+    internal double TrackingSpeed => BurstTrackingState.Speed(ShootingAccuracy,
+        EquipmentSource?.GetStatValue(StatDefOf.Mass) ?? 4f,
+        ShooterPawn?.GetStatValue(CE_StatDefOf.CarryWeight) ?? 40f);
 
     public override float WarmupTime => Mathf.Max(0, base.WarmupTime * (1f + (base.EquipmentSource?.GetStatValue(StatDefOf.RangedWeapon_WarmupMultiplier) - 1f ?? 0f) + (projectilePropsCE?.warmupMultiplier - 1f ?? 0f)) + (projectilePropsCE?.warmupOffset ?? 0f));
 
@@ -261,6 +258,8 @@ public class Verb_LaunchProjectileCE : Verb
 
     protected void resetRetarget()
     {
+        burstTracking.Reset();
+        heldBurstLine = false;
         shootingAtDowned = false;
         lastTarget = null;
         lastTargetPos = IntVec3.Invalid;
@@ -286,6 +285,8 @@ public class Verb_LaunchProjectileCE : Verb
 
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
         {
+            burstTracking.Reset();
+            heldBurstLine = false;
             // Keep the loaded stance/turret warmup, but rebuild transient burst history.
             repeating = false;
             storedShotReduction = null;
@@ -341,6 +342,9 @@ public class Verb_LaunchProjectileCE : Verb
         }
 
         numShotsFired = 0;
+        isTurretMannable = Caster.TryGetComp<CompMannable>() != null;
+        burstTracking.Reset();
+        heldBurstLine = false;
         base.WarmupComplete();
         Find.BattleLog.Add(
             new BattleLogEntry_RangedFire(
@@ -365,7 +369,7 @@ public class Verb_LaunchProjectileCE : Verb
         }
         else
         {
-            var victimVert = new CollisionVertical(currentTarget.Thing);
+            var victimVert = new CollisionVertical(target.Thing);
             var targetRange = victimVert.HeightRange;   //Get lower and upper heights of the target
             if (targetRange.min < coverRange.max)   //Some part of the target is hidden behind some cover
             {
@@ -379,14 +383,14 @@ public class Verb_LaunchProjectileCE : Verb
                     targetRange.max = coverRange.max * 2;
                 }
             }
-            else if (currentTarget.Thing is Pawn Victim)
+            else if (target.Thing is Pawn Victim)
             {
                 targetRange.min = victimVert.BottomHeight;
                 targetRange.max = victimVert.MiddleHeight;
 
                 bool AppropiateAimMode = CompFireModes?.CurrentAimMode != AimMode.SuppressFire;
 
-                bool IsAccurate = (ShootingAccuracy >= 2.45f) | isTurretMannable;
+                bool IsAccurate = (ShootingAccuracy >= 2.45f) | (Caster.TryGetComp<CompMannable>() != null);
 
 
                 if (IsAccurate)
@@ -532,8 +536,12 @@ public class Verb_LaunchProjectileCE : Verb
             if (numShotsFired == 0)
             {
                 // On first shot of burst do a range estimate
-                estimatedTargDist = report.GetRandDist();
+                if (UsesBurstTracking) rangeErrorSample = Rand.Range(-1f, 1f);
+                else estimatedTargDist = report.GetRandDist();
             }
+
+            if (UsesBurstTracking)
+                estimatedTargDist = Mathf.Max(0.001f, report.shotDist + rangeErrorSample * report.distShift);
 
 
             // v is already the pawn's DrawPos, lean included. adding the lean again here is how we
@@ -548,18 +556,14 @@ public class Verb_LaunchProjectileCE : Verb
 
             // ----------------------------------- STEP 1: Actual location + Shift for visibility
 
-            //FIXME : GetRandCircularVec may be causing recoil to be unnoticeable - each next shot in the burst has a new random circular vector around the target.
-            newTargetLoc += report.GetRandCircularVec();
-
-            // ----------------------------------- STEP 2: Estimated shot to hit location
-
-            newTargetLoc = sourceLoc + (newTargetLoc - sourceLoc).normalized * estimatedTargDist;
-
-            // Lead a moving target
-            if (!isInstant)
-            {
-                newTargetLoc += report.GetRandLeadVec();
-            }
+            // Visibility error remains independent of the clean tracked direction.
+            Vector2 circular = report.GetRandCircularVec();
+            Vector2 cleanLead = isInstant ? Vector2.zero : report.GetLeadVec(0f);
+            Vector2 noisyLead = isInstant ? Vector2.zero : report.GetRandLeadVec();
+            ShotVector shifted = ShotGeometry.OffsetTarget(new ShotVector(sourceLoc.x, 0, sourceLoc.y),
+                new ShotVector(v.x, 0, v.z), estimatedTargDist,
+                new ShotVector(circular.x, 0, circular.y), new ShotVector(noisyLead.x, 0, noisyLead.y));
+            newTargetLoc.Set((float)shifted.X, (float)shifted.Z);
 
             // ----------------------------------- STEP 3: Recoil, Skewing, Skill checks, Cover calculations
 
@@ -575,7 +579,23 @@ public class Verb_LaunchProjectileCE : Verb
 
             if (!LockRotationAndAngle)
             {
-                lastShotAngle = ShotAngle(u.WithY(ShotHeight), newTargetLoc.ToVector3().WithY(targetHeight));
+                float noisyAngle = ShotAngle(u.WithY(ShotHeight), newTargetLoc.ToVector3().WithY(targetHeight));
+                float noisyRotation = ShotRotation(newTargetLoc.ToVector3());
+                if (UsesBurstTracking)
+                {
+                    Vector3 cleanTarget = new Vector3(v.x + cleanLead.x, targetHeight, v.z + cleanLead.y);
+                    float cleanAngle = ShotAngle(u.WithY(ShotHeight), cleanTarget);
+                    float cleanRotation = ShotRotation(cleanTarget);
+                    burstTracking.Advance(cleanRotation, cleanAngle * Mathf.Rad2Deg,
+                        Find.TickManager.TicksGame, TrackingSpeed, Controller.settings.LimitTrackingSpeed);
+                    lastShotRotation = (float)(burstTracking.Rotation + BurstTrackingState.Delta(cleanRotation, noisyRotation));
+                    lastShotAngle = (float)(burstTracking.Elevation * Mathf.Deg2Rad + noisyAngle - cleanAngle);
+                }
+                else
+                {
+                    lastShotAngle = noisyAngle;
+                    lastShotRotation = noisyRotation;
+                }
             }
             angleRadians += lastShotAngle;
         }
@@ -586,10 +606,6 @@ public class Verb_LaunchProjectileCE : Verb
         Vector2 spreadVec = (projectilePropsCE.isInstant && projectilePropsCE.damageFalloff) ? new Vector2(0, 0) : report.GetRandSpreadVec();
         // ----------------------------------- STEP 5: Finalization
 
-        if (!LockRotationAndAngle)
-        {
-            lastShotRotation = ShotRotation(newTargetLoc.ToVector3());
-        }
         shotRotation = (lastShotRotation + rotationDegrees + spreadVec.x) % 360;
         shotAngle = angleRadians + spreadVec.y * Mathf.Deg2Rad;
         distance = (newTargetLoc - sourceLoc).magnitude;
@@ -684,7 +700,9 @@ public class Verb_LaunchProjectileCE : Verb
         {
             report.sightsEfficiency = 0;
         }
-        report.shotDist = (targetCell - caster.Position).LengthHorizontal;
+        report.shotDist = UsesBurstTracking && target.Thing is Pawn
+            ? (target.Thing.DrawPos - caster.TrueCenter()).MagnitudeHorizontal()
+            : (targetCell - caster.Position).LengthHorizontal;
         Vector3 shotOrigin = caster.TrueCenter();
         report.shotSource.Set(shotOrigin.x, shotOrigin.z);
         report.maxRange = EffectiveRange;
@@ -694,7 +712,7 @@ public class Verb_LaunchProjectileCE : Verb
         {
             report.weatherShift = 1 - caster.Map.weatherManager.CurWeatherAccuracyMultiplier;
         }
-        report.shotSpeed = ShotSpeed;
+        report.shotSpeed = ShotSpeedFor(target);
         report.swayDegrees = SwayAmplitude;
         float spreadmult = projectilePropsCE != null ? projectilePropsCE.spreadMult : 0f;
         report.spreadDegrees = (EquipmentSource?.GetStatValue(CE_StatDefOf.ShotSpread) ?? 0) * spreadmult;
@@ -1065,49 +1083,27 @@ public class Verb_LaunchProjectileCE : Verb
 
     protected virtual bool KeepBurstOnNoShootLine(bool suppressing, out ShootLine shootLine)
     {
-        // 1:       Interruptible -> stop shooting
-        // 2:       Not interruptible -> continue shooting at last position (do *not* shoot at target position as it will play badly with skip or other teleport effects)
-        // 3:     Suppressing fire -> set our shoot line and continue
-        // 4:     else -> stop
-        //      Target missing
-        //        Mid burst
-        // 5:       Interruptible -> stop shooting
-        // 6:       Not interruptible -> shoot along previous line
-        // 7:     else -> stop
-        if (lastShootLine == null)
+        // Tracking no longer locks a valid solution, but losing sight must retain the
+        // original interruption/last-position/suppression policy.
+        bool locked = UsesBurstTracking ? !didRetarget && MidBurst : LockRotationAndAngle;
+        var action = BurstTrackingState.LostSight(lastShootLine.HasValue, locked,
+            VerbPropsCE.interruptibleBurst, suppressing, currentTarget.IsValid && !currentTarget.ThingDestroyed);
+        if (action == BurstSightAction.Stop)
         {
             shootLine = default;
             return false;
         }
-        shootLine = (ShootLine)lastShootLine;
-        if (LockRotationAndAngle) // Case 1,2,5,6
+        shootLine = lastShootLine.Value;
+        if (action == BurstSightAction.HoldLastPosition)
         {
-            if (VerbPropsCE.interruptibleBurst && !suppressing) // Case 1, 5
-            {
-                return false;
-            }
-            // Case 2, 6
+            heldBurstLine = true;
             currentTarget = new LocalTargetInfo(lastTargetPos);
             lastExactPos = lastTargetPos.ToVector3Shifted();
         }
-        else // case 3,4,7
+        else
         {
-            if (suppressing) // case 3,4
-            {
-                if (currentTarget.IsValid && !currentTarget.ThingDestroyed)
-                {
-                    lastShootLine = shootLine = new ShootLine(caster.Position, currentTarget.Cell);
-                    lastExactPos = currentTarget.Cell.ToVector3Shifted();
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
+            lastShootLine = shootLine = new ShootLine(caster.Position, currentTarget.Cell);
+            lastExactPos = currentTarget.Cell.ToVector3Shifted();
         }
         return true;
     }
@@ -1122,6 +1118,7 @@ public class Verb_LaunchProjectileCE : Verb
         var props = VerbPropsCE;
         var midBurst = numShotsFired > 0;
         var suppressing = CompFireModes?.CurrentAimMode == AimMode.SuppressFire;
+        heldBurstLine = false;
 
         // Cases
         // 1: Can hit target, set our previous shoot line

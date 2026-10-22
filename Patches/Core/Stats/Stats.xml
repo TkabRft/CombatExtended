@@ -248,7 +248,7 @@
 	<Operation Class="PatchOperationReplace">
 		<xpath>Defs/StatDef[defName="ShootingAccuracyPawn"]/description</xpath>
 		<value>
-			<description>How well a shooter holds a weapon steady, compensates for recoil. Higher values continue to improve control with diminishing returns. Handling beyond an unmodified expert's level provides stronger recoil control and shortens extra aim preparation. Weapon handling does not reduce inherent weapon spread.</description>
+			<description>How well a shooter holds a weapon steady, compensates for recoil, and tracks targets during a burst. Higher values continue to improve control with diminishing returns. Handling beyond an unmodified expert's level provides stronger recoil control and shortens extra aim preparation. When tracking speed is limited, heavier loaded weapons turn more slowly relative to the shooter's carry weight. Weapon handling does not reduce inherent weapon spread.</description>
 		</value>
 	</Operation>
 

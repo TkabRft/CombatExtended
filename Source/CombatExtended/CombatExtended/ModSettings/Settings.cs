@@ -48,6 +48,7 @@ public class Settings : ModSettings, ISettingsCE
 
     private bool midBurstRetarget = true;
     private bool fasterRepeatShots = true;
+    private bool limitTrackingSpeed = true;
     private float fasterRepeatShotsRecoilMult = 1.0f;
 
     private float explosionPenMultiplier = 1.0f;
@@ -176,6 +177,7 @@ public class Settings : ModSettings, ISettingsCE
     public float FragmentsFromWallsIntensity => fragmentsFromWallsIntensity;
 
     public bool FasterRepeatShots => fasterRepeatShots;
+    public bool LimitTrackingSpeed => limitTrackingSpeed;
     public float FasterRepeatShotsRecoilMult => fasterRepeatShotsRecoilMult;
     public bool MidBurstRetarget => midBurstRetarget;
 
@@ -279,6 +281,7 @@ public class Settings : ModSettings, ISettingsCE
         Scribe_Values.Look(ref fragmentsFromWallsReflected, "fragmentsFromWallsReflected", false);
         Scribe_Values.Look(ref fragmentsFromWallsIntensity, "fragmentsFromWallsIntensity", 1.0f);
         Scribe_Values.Look(ref fasterRepeatShots, "fasterRepeatShots", false);
+        Scribe_Values.Look(ref limitTrackingSpeed, "limitTrackingSpeed", true);
         Scribe_Values.Look(ref fasterRepeatShotsRecoilMult, "fasterRepeatShotsRecoilMult", 1.0f);
         Scribe_Values.Look(ref midBurstRetarget, "midBurstRetarget", true);
         Scribe_Values.Look(ref explosionPenMultiplier, "explosionPenMultiplier", 1.0f);
@@ -389,6 +392,7 @@ public class Settings : ModSettings, ISettingsCE
         medicineSearchRadius = right.SliderLabeled("CE_Settings_MedicineSearchRadius_Title".Translate() + ": " + medicineSearchRadius.ToString("F0"), medicineSearchRadius, 1f, 100f, tooltip: "CE_Settings_MedicineSearchRadius_Desc".Translate(), labelPct: 0.6f);
         right.GapLine();
         right.CheckboxLabeled("CE_Settings_FasterRepeatShots_Title".Translate(), ref fasterRepeatShots, "CE_Settings_FasterRepeatShots_Desc".Translate());
+        right.CheckboxLabeled("CE_Settings_LimitTrackingSpeed_Title".Translate(), ref limitTrackingSpeed, "CE_Settings_LimitTrackingSpeed_Desc".Translate());
         fasterRepeatShotsRecoilMult = right.SliderLabeled("CE_Settings_FasterRepeatShotsMultiplier_Title".Translate() + ": " + fasterRepeatShotsRecoilMult.ToString("F1"), fasterRepeatShotsRecoilMult, 0.1f, 3f, tooltip: "CE_Settings_FasterRepeatShotsMultiplier_Desc".Translate(), labelPct: 0.6f);
         right.End();
     }
@@ -559,6 +563,7 @@ public class Settings : ModSettings, ISettingsCE
         smokeEffects = true;
         turretsBreakShields = true;
         fasterRepeatShots = true;
+        limitTrackingSpeed = true;
         fasterRepeatShotsRecoilMult = 1.0f;
         midBurstRetarget = true;
         enableCIWS = true;

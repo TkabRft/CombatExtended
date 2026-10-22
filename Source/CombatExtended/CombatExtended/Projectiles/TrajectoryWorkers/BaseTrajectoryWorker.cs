@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using CombatExtended.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -108,12 +109,9 @@ public abstract class BaseTrajectoryWorker
         float gravityPerWidth = projectilePropsCE.GravityPerWidth;
         float heightDifference = targetHeight - shotHeight;
         float range = (newTargetLoc - sourceV2).magnitude;
-        float squareRootCheck = Mathf.Sqrt(Mathf.Pow(_speed, 4f) - gravityPerWidth * (gravityPerWidth * Mathf.Pow(range, 2f) + 2f * heightDifference * Mathf.Pow(_speed, 2f)));
-        if (float.IsNaN(squareRootCheck))
-        {
-            return null;
-        }
-        return Mathf.Atan((Mathf.Pow(_speed, 2f) + (projectilePropsCE.flyOverhead ? 1f : -1f) * squareRootCheck) / (gravityPerWidth * range));
+        double result = ShotGeometry.Elevation(range, heightDifference, _speed, gravityPerWidth,
+            false, projectilePropsCE.flyOverhead);
+        return double.IsNaN(result) ? (float?)null : (float)result;
     }
 
     public virtual float ShotRotation(ProjectilePropertiesCE projectilePropertiesCE, Vector3 source, Vector3 targetPos)
