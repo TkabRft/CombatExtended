@@ -13,7 +13,7 @@ using Verse.AI;
 using Random = UnityEngine.Random;
 namespace CombatExtended;
 
-public static class CE_Utility
+public static partial class CE_Utility
 {
     #region Camera
 
@@ -1293,33 +1293,6 @@ public static class CE_Utility
     public static float LightingRangeMultiplier(float range)
     {
         return lightingCurve.Evaluate(range);
-    }
-
-    private static Map[] _mapsLighting = new Map[20];
-    private static LightingTracker[] _lightingTrackers = new LightingTracker[20];
-
-    public static LightingTracker GetLightingTracker(this Map map)
-    {
-        int index = map?.Index ?? -1;
-        if (index < 0)
-        {
-            return null;
-        }
-        if (index >= _mapsLighting.Length)
-        {
-            int expandedLength = Mathf.Max(_mapsLighting.Length * 2, index + 1);
-            Map[] maps = new Map[expandedLength];
-            LightingTracker[] trackers = new LightingTracker[expandedLength];
-            Array.Copy(_mapsLighting, maps, _mapsLighting.Length);
-            Array.Copy(_lightingTrackers, trackers, _lightingTrackers.Length);
-            _mapsLighting = maps;
-            _lightingTrackers = trackers;
-        }
-        if (_mapsLighting[index] == map)
-        {
-            return _lightingTrackers[index];
-        }
-        return _lightingTrackers[index] = (_mapsLighting[index] = map).GetComponent<LightingTracker>();
     }
 
     private static Map[] _mapsDanger = new Map[20];

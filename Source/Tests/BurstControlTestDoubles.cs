@@ -59,7 +59,7 @@ namespace Verse
         public static implicit operator LocalTargetInfo(Pawn pawn) => new(pawn);
     }
     internal readonly struct TargetInfo(Pawn pawn) { internal readonly Pawn Pawn = pawn; }
-    internal sealed class Map
+    internal sealed partial class Map
     {
         internal FixtureMapPawns mapPawns = new();
         internal bool Fog;

@@ -50,5 +50,6 @@ namespace CombatExtended
     internal static class CE_StatDefOf
     {
         public static RimWorld.StatDef AimingAccuracy;
+        public static readonly RimWorld.StatDef NightVisionEfficiency = new();
     }
 }

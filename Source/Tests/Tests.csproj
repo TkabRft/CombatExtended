@@ -11,6 +11,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="..\CombatExtended\CombatExtended\CE_Utility.Lighting.cs" Link="Lighting\CE_Utility.Lighting.cs" />
+        <Compile Include="..\CombatExtended\CombatExtended\AI\AI_Utility.Visibility.cs" Link="Lighting\AI_Utility.Visibility.cs" />
         <Compile Include="..\CombatExtended\Utilities\BurstControlState.cs" Link="Accuracy\BurstControlState.cs" />
         <Compile Include="..\CombatExtended\CombatExtended\Verbs\Verb_LaunchProjectileCE.BurstControl.cs" Link="Accuracy\Verb_LaunchProjectileCE.BurstControl.cs" />
         <Compile Include="..\CombatExtended\Utilities\AccuracyMath.cs" Link="Accuracy\AccuracyMath.cs" />
