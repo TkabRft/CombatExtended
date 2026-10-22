@@ -47,7 +47,8 @@
 
 	<CE_EstimatedHitChance>Estimated hit chance</CE_EstimatedHitChance>
 	<CE_EstimatedBurstHitChance>Estimated burst hit chance</CE_EstimatedBurstHitChance>
-	<CE_BurstHitChanceExplanation>Average fraction of rounds hitting this target, assuming its current movement and cover continue. This is not the chance of at least one hit.</CE_BurstHitChanceExplanation>
+	<CE_BurstHitChanceExplanation>Average fraction of rounds hitting this target, assuming it remains active and its current movement and cover continue. Target incapacitation and burst retargeting are not predicted. This is not the chance of at least one hit.</CE_BurstHitChanceExplanation>
+	<CE_TargetNoLongerActive>Target is no longer active. Issue a new attack order to finish it.</CE_TargetNoLongerActive>
 	<CE_BurstHitChanceUnavailable>Unavailable for this trajectory</CE_BurstHitChanceUnavailable>
 	<CE_AccuracyCurveExplanation>Accuracy conversion: diminishing returns, with continued gains beyond the original curve.</CE_AccuracyCurveExplanation>
 

@@ -103,7 +103,9 @@ public partial class Verb_LaunchProjectileCE : Verb
             return compCharges;
         }
     }
-    protected float ShotSpeed => ShotSpeedFor(currentTarget);
+    protected float ShotSpeed => ShotSpeedFor(holdAdaptiveSolution
+        ? new LocalTargetInfo(new Vector3((float)burstControl.LastPosition.X, 0, (float)burstControl.LastPosition.Z).ToIntVec3())
+        : currentTarget);
 
     private float ShotSpeedFor(LocalTargetInfo target)
     {
@@ -258,6 +260,7 @@ public partial class Verb_LaunchProjectileCE : Verb
 
     protected void resetRetarget()
     {
+        ResetAdaptiveBurst();
         burstTracking.Reset();
         heldBurstLine = false;
         shootingAtDowned = false;
@@ -285,6 +288,8 @@ public partial class Verb_LaunchProjectileCE : Verb
 
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
         {
+            ResetAdaptiveBurst(true);
+            stoppedBurstTarget = null;
             burstTracking.Reset();
             heldBurstLine = false;
             // Keep the loaded stance/turret warmup, but rebuild transient burst history.
@@ -342,6 +347,7 @@ public partial class Verb_LaunchProjectileCE : Verb
         }
 
         numShotsFired = 0;
+        ResetAdaptiveBurst(reconstructBurstControl);
         isTurretMannable = Caster.TryGetComp<CompMannable>() != null;
         burstTracking.Reset();
         heldBurstLine = false;
@@ -575,9 +581,12 @@ public partial class Verb_LaunchProjectileCE : Verb
 
             // Height difference calculations for ShotAngle
 
-            report.targetHeight = targetHeight = GetTargetHeight(report.target, report.cover, report.roofed, v);
+            report.targetHeight = targetHeight = holdAdaptiveSolution ? (float)burstControl.Height
+                : GetTargetHeight(report.target, report.cover, report.roofed, v);
+            if (holdAdaptiveSolution)
+                burstControl.AdvanceHeldTracking(burstTracking, Find.TickManager.TicksGame);
 
-            if (!LockRotationAndAngle)
+            if (!LockRotationAndAngle || holdAdaptiveSolution)
             {
                 float noisyAngle = ShotAngle(u.WithY(ShotHeight), newTargetLoc.ToVector3().WithY(targetHeight));
                 float noisyRotation = ShotRotation(newTargetLoc.ToVector3());
@@ -586,8 +595,9 @@ public partial class Verb_LaunchProjectileCE : Verb
                     Vector3 cleanTarget = new Vector3(v.x + cleanLead.x, targetHeight, v.z + cleanLead.y);
                     float cleanAngle = ShotAngle(u.WithY(ShotHeight), cleanTarget);
                     float cleanRotation = ShotRotation(cleanTarget);
-                    burstTracking.Advance(cleanRotation, cleanAngle * Mathf.Rad2Deg,
-                        Find.TickManager.TicksGame, TrackingSpeed, Controller.settings.LimitTrackingSpeed);
+                    if (!holdAdaptiveSolution)
+                        burstTracking.Advance(cleanRotation, cleanAngle * Mathf.Rad2Deg,
+                            Find.TickManager.TicksGame, TrackingSpeed, Controller.settings.LimitTrackingSpeed);
                     lastShotRotation = (float)(burstTracking.Rotation + BurstTrackingState.Delta(cleanRotation, noisyRotation));
                     lastShotAngle = (float)(burstTracking.Elevation * Mathf.Deg2Rad + noisyAngle - cleanAngle);
                 }
@@ -598,6 +608,7 @@ public partial class Verb_LaunchProjectileCE : Verb
                 }
             }
             angleRadians += lastShotAngle;
+            RecordAdaptiveSolution(v, targetHeight);
         }
 
         // ----------------------------------- STEP 4: Mechanical variation
@@ -914,6 +925,11 @@ public partial class Verb_LaunchProjectileCE : Verb
     public virtual bool CanHitTargetFrom(IntVec3 root, LocalTargetInfo targ, out string report)
     {
         report = "";
+        if (IsStoppedBurstTarget(targ))
+        {
+            report = "CE_TargetNoLongerActive".Translate();
+            return false;
+        }
         if (caster is Building_TurretGunCE turret)
         {
             if (turret.targetingWorldMap && turret.globalTargetInfo.IsValid)
@@ -1069,6 +1085,11 @@ public partial class Verb_LaunchProjectileCE : Verb
 
     public override bool TryStartCastOn(LocalTargetInfo castTarg, LocalTargetInfo destTarg, bool surpriseAttack = false, bool canHitNonTargetPawns = true, bool preventFriendlyFire = false, bool nonInterruptingSelfCast = false)
     {
+        if (IsStoppedBurstTarget(castTarg))
+        {
+            CancelSubsequentShotWarmup();
+            return false;
+        }
         bool startedCasting = base.TryStartCastOn(castTarg, destTarg, surpriseAttack, canHitNonTargetPawns, preventFriendlyFire, nonInterruptingSelfCast);
         if (startedCasting)
         {
@@ -1116,12 +1137,20 @@ public partial class Verb_LaunchProjectileCE : Verb
     /// <returns>True for successful shot, false otherwise</returns>
     public override bool TryCastShot()
     {
-        didRetarget = Retarget();
+        didRetarget = adaptiveRoundPrepared ? adaptiveRoundRetargeted : Retarget();
         doRetarget = true;
         var props = VerbPropsCE;
         var midBurst = numShotsFired > 0;
         var suppressing = CompFireModes?.CurrentAimMode == AimMode.SuppressFire;
         heldBurstLine = false;
+        LocalTargetInfo fireTarget = currentTarget;
+        if (holdAdaptiveSolution)
+        {
+            fireTarget = new LocalTargetInfo(new Vector3((float)burstControl.LastPosition.X, 0, (float)burstControl.LastPosition.Z).ToIntVec3());
+            heldBurstLine = true;
+            lastShotRotation = (float)burstControl.Rotation;
+            lastShotAngle = (float)burstControl.Elevation * Mathf.Deg2Rad;
+        }
 
         // Cases
         // 1: Can hit target, set our previous shoot line
@@ -1129,12 +1158,14 @@ public partial class Verb_LaunchProjectileCE : Verb
         //      Target exists
         //        Mid burst
         // 2: Check if we should continue shooting
-        if (TryFindCEShootLineFromTo(caster.Position, currentTarget, out var shootLine, out var targetLoc)) // Case 1
+        if (TryFindCEShootLineFromTo(caster.Position, fireTarget, out var shootLine, out var targetLoc)) // Case 1
         {
+            if (holdAdaptiveSolution)
+                targetLoc = new Vector3((float)burstControl.LastPosition.X, 0, (float)burstControl.LastPosition.Z);
             lastShootLine = shootLine;
             lastExactPos = targetLoc;
         }
-        else if (!KeepBurstOnNoShootLine(suppressing, out shootLine))// Case 2. We cannot hit the current target, check if we should continue shooting
+        else if (holdAdaptiveSolution || !KeepBurstOnNoShootLine(suppressing, out shootLine))// Case 2. We cannot hit the current target, check if we should continue shooting
         {
             CancelSubsequentShotWarmup();
             return false;
@@ -1158,7 +1189,8 @@ public partial class Verb_LaunchProjectileCE : Verb
             aperatureSize = 0.03f;
         }
 
-        ShiftVecReport report = ShiftVecReportFor(currentTarget, targetLoc.ToIntVec3());
+        ShiftVecReport report = ShiftVecReportFor(fireTarget, targetLoc.ToIntVec3());
+        if (holdAdaptiveSolution) report.shotDist = (targetLoc - caster.TrueCenter()).MagnitudeHorizontal();
         bool pelletMechanicsOnly = false;
         for (int i = 0; i < projectilePropsCE.pelletCount; i++)
         {
@@ -1170,10 +1202,10 @@ public partial class Verb_LaunchProjectileCE : Verb
             //New aiming algorithm
             projectile.canTargetSelf = false;
 
-            var targetDistance = (sourceLoc - currentTarget.Cell.ToIntVec2.ToVector2Shifted()).magnitude;
+            var targetDistance = (sourceLoc - fireTarget.Cell.ToIntVec2.ToVector2Shifted()).magnitude;
 
             projectile.minCollisionDistance = GetMinCollisionDistance(targetDistance);
-            projectile.intendedTarget = currentTarget;
+            projectile.intendedTarget = fireTarget;
             projectile.mount = caster.Position.GetThingList(caster.Map).FirstOrDefault(t => t is Pawn && t != caster);
             projectile.AccuracyFactor = report.accuracyFactor * report.swayDegrees * ((numShotsFired + 1) * 0.75f);
 
@@ -1204,7 +1236,7 @@ public partial class Verb_LaunchProjectileCE : Verb
             if (instant)
             {
                 var shotHeight = ShotHeight;
-                float tsa = AdjustShotHeight(caster, currentTarget, ref shotHeight);
+                float tsa = holdAdaptiveSolution ? 0 : AdjustShotHeight(caster, fireTarget, ref shotHeight);
                 projectile.RayCast(
                     Shooter,
                     verbProps,
@@ -1266,6 +1298,7 @@ public partial class Verb_LaunchProjectileCE : Verb
 
     protected void NotifySubsequentShotFired(bool firstPellet)
     {
+        if (firstPellet && adaptiveRoundPrepared) burstControl.RecordEmission();
         if (!subsequentShotState.RecordShot(numShotsFired == 0, pendingShotRecoil,
             Controller.settings.FasterRepeatShots, CompAmmo?.HasMagazine != false, firstPellet))
         {
@@ -1294,6 +1327,8 @@ public partial class Verb_LaunchProjectileCE : Verb
             return;
         }
 
+        stoppedBurstTarget = null;
+        ResetAdaptiveBurst(false);
         base.OrderForceTarget(target);
     }
 

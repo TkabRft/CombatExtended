@@ -379,6 +379,7 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
 
     public override bool TryCastShot()
     {
+        if (!PrepareAdaptiveBurstRound()) return false;
         if (!CompAmmo?.TryPrepareShot() ?? false)
         {
             CancelSubsequentShotWarmup();

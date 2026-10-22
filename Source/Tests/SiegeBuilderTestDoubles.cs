@@ -14,7 +14,7 @@ namespace HarmonyLib
 
 namespace Verse
 {
-    internal sealed class Pawn
+    internal sealed partial class Pawn
     {
         public PawnMindState mindState = new();
         public object skills = new();

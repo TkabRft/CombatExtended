@@ -119,8 +119,10 @@
 	<CE_Settings_LimitTrackingSpeed_Title>Limit tracking speed</CE_Settings_LimitTrackingSpeed_Title>
 	<CE_Settings_LimitTrackingSpeed_Desc>During a burst, shooters turn toward moving or newly selected targets at a limited speed. Weapon handling and carry weight improve tracking; heavier loaded weapons slow it. Disable to fully re-aim each round. Weapon spread is unchanged.</CE_Settings_LimitTrackingSpeed_Desc>
 
-	<CE_Settings_MidBurstRetarget_Desc>When enabled, shooters will switch to a new target when their primary target is downed mid-burst.</CE_Settings_MidBurstRetarget_Desc>
+	<CE_Settings_MidBurstRetarget_Desc>When a targeted pawn falls during a burst, shooters can switch to a nearby standing enemy. Shooting skill and consciousness determine how quickly they react. Replacements must stay within 5 cells of the original target and a limited angle, wider at close range. Turning still obeys the tracking-speed setting. Cell-targeted suppression is unchanged.</CE_Settings_MidBurstRetarget_Desc>
 	<CE_Settings_MidBurstRetarget_Title>Retarget mid burst</CE_Settings_MidBurstRetarget_Title>
+	<CE_Settings_StopBurstAfterTargetFalls_Title>Stop bursts after target falls</CE_Settings_StopBurstAfterTargetFalls_Title>
+	<CE_Settings_StopBurstAfterTargetFalls_Desc>Allow shooters to stop the remaining burst after noticing their target is downed or dead, if no replacement is selected. Shooting skill and consciousness improve reaction: an unimpaired expert reacts before the next round, while an inexperienced or impaired shooter may waste more rounds. Independent of retargeting. Deliberate finishing shots and cell-targeted suppression are unchanged.</CE_Settings_StopBurstAfterTargetFalls_Desc>
 
 	<CE_Settings_EnableExtraEffects_Title>Show additional projectile visual effects</CE_Settings_EnableExtraEffects_Title>
 	<CE_Settings_EnableExtraEffects_Desc>Bullets and other projectiles will display additional effects, such as bullets kicking up dust or incendiaries throwing sparks. Cosmetic only, does not affect gameplay.</CE_Settings_EnableExtraEffects_Desc>

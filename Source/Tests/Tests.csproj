@@ -11,6 +11,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="..\CombatExtended\Utilities\BurstControlState.cs" Link="Accuracy\BurstControlState.cs" />
+        <Compile Include="..\CombatExtended\CombatExtended\Verbs\Verb_LaunchProjectileCE.BurstControl.cs" Link="Accuracy\Verb_LaunchProjectileCE.BurstControl.cs" />
         <Compile Include="..\CombatExtended\Utilities\AccuracyMath.cs" Link="Accuracy\AccuracyMath.cs" />
         <Compile Include="..\CombatExtended\Utilities\BurstTrackingState.cs" Link="Accuracy\BurstTrackingState.cs" />
         <Compile Include="..\CombatExtended\Utilities\ShotGeometry.cs" Link="Accuracy\ShotGeometry.cs" />

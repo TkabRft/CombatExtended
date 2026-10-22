@@ -47,6 +47,7 @@ public class Settings : ModSettings, ISettingsCE
     private float fragmentsFromWallsIntensity = 1.0f;
 
     private bool midBurstRetarget = true;
+    private bool stopBurstAfterTargetFalls = true;
     private bool fasterRepeatShots = true;
     private bool limitTrackingSpeed = true;
     private float fasterRepeatShotsRecoilMult = 1.0f;
@@ -180,6 +181,7 @@ public class Settings : ModSettings, ISettingsCE
     public bool LimitTrackingSpeed => limitTrackingSpeed;
     public float FasterRepeatShotsRecoilMult => fasterRepeatShotsRecoilMult;
     public bool MidBurstRetarget => midBurstRetarget;
+    public bool StopBurstAfterTargetFalls => stopBurstAfterTargetFalls;
 
     public float ExplosionPenMultiplier => explosionPenMultiplier;
     public float ExplosionFalloffFactor => explosionFalloffFactor;
@@ -284,6 +286,7 @@ public class Settings : ModSettings, ISettingsCE
         Scribe_Values.Look(ref limitTrackingSpeed, "limitTrackingSpeed", true);
         Scribe_Values.Look(ref fasterRepeatShotsRecoilMult, "fasterRepeatShotsRecoilMult", 1.0f);
         Scribe_Values.Look(ref midBurstRetarget, "midBurstRetarget", true);
+        Scribe_Values.Look(ref stopBurstAfterTargetFalls, "stopBurstAfterTargetFalls", true);
         Scribe_Values.Look(ref explosionPenMultiplier, "explosionPenMultiplier", 1.0f);
         Scribe_Values.Look(ref explosionFalloffFactor, "explosionFalloffFactor", 1.0f);
         Scribe_Values.Look(ref suppressionCausesRunning, "suppressionCausesRunning", true);
@@ -344,6 +347,7 @@ public class Settings : ModSettings, ISettingsCE
         left.CheckboxLabeled("CE_Settings_SmokeEffects_Title".Translate(), ref smokeEffects, "CE_Settings_SmokeEffects_Desc".Translate());
         left.CheckboxLabeled("CE_Settings_TurretsBreakShields_Title".Translate(), ref turretsBreakShields, "CE_Settings_TurretsBreakShields_Desc".Translate());
         left.CheckboxLabeled("CE_Settings_MidBurstRetarget_Title".Translate(), ref midBurstRetarget, "CE_Settings_MidBurstRetarget_Desc".Translate());
+        left.CheckboxLabeled("CE_Settings_StopBurstAfterTargetFalls_Title".Translate(), ref stopBurstAfterTargetFalls, "CE_Settings_StopBurstAfterTargetFalls_Desc".Translate());
         left.CheckboxLabeled("CE_Settings_EnableArcOfFire_Title".Translate(), ref enableArcOfFire, "CE_Settings_EnableArcOfFire_Desc".Translate());
         left.CheckboxLabeled("CE_Settings_EnableCIWS".Translate(), ref enableCIWS, "CE_Settings_EnableCIWS_Desc".Translate());
         left.CheckboxLabeled("CE_Settings_SuppressionCausesRunning_Title".Translate(), ref suppressionCausesRunning, "CE_Settings_SuppressionCausesRunning_Desc".Translate());
@@ -566,6 +570,7 @@ public class Settings : ModSettings, ISettingsCE
         limitTrackingSpeed = true;
         fasterRepeatShotsRecoilMult = 1.0f;
         midBurstRetarget = true;
+        stopBurstAfterTargetFalls = true;
         enableCIWS = true;
         fragmentsFromWalls = false;
         fragmentsFromWallsReflected = false;
