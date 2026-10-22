@@ -12,16 +12,9 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
 {
     #region Constants
 
-    // How much time to spend on aiming
-    private const int AimTicksMin = 30;
-    private const int AimTicksMax = 240;
-
     // XP amounts as taken from vanilla Verb_Shoot
     private const float PawnXp = 20f;
     private const float HostileXp = 170f;
-
-    // Suppression aim penalty
-    private const float SuppressionSwayFactor = 1.5f;
 
     #endregion
 
@@ -88,27 +81,7 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
 
     public override bool ShouldSpawnAimingSound => !_isAiming;
 
-    public override float SwayAmplitude // TODO: Fix SwayAmplitude and SwayAmplitudeFor code re-use
-    {
-        get
-        {
-            var sway = base.SwayAmplitude;
-            float sightsEfficiency = SightsEfficiency;
-            if (ShooterPawn != null && !ShooterPawn.health.capacities.CapableOf(PawnCapacityDefOf.Sight))
-            {
-                sightsEfficiency = 0;
-            }
-            if (ShouldAim)
-            {
-                return sway * Mathf.Max(0, 1 - AimingAccuracy) / Mathf.Max(1, sightsEfficiency);
-            }
-            else if (IsSuppressed)
-            {
-                return sway * SuppressionSwayFactor;
-            }
-            return sway;
-        }
-    }
+    public override float SwayAmplitude => SwayAmplitudeFor(ShouldAim);
 
     public float AimAngle
     {
@@ -156,6 +129,9 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
     #region Methods
 
     public float SwayAmplitudeFor(AimMode mode)
+        => SwayAmplitudeFor(ShouldAimFor(mode));
+
+    private float SwayAmplitudeFor(bool aimed)
     {
         float sway = base.SwayAmplitude;
         float sightsEfficiency = SightsEfficiency;
@@ -163,15 +139,7 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
         {
             sightsEfficiency = 0;
         }
-        if (ShouldAimFor(mode))
-        {
-            return sway * Mathf.Max(0, 1 - AimingAccuracy) / Mathf.Max(1, sightsEfficiency);
-        }
-        else if (IsSuppressed)
-        {
-            return sway * SuppressionSwayFactor;
-        }
-        return sway;
+        return AccuracyMath.ModeSway(sway, AimingAccuracy, sightsEfficiency, aimed, IsSuppressed);
     }
 
     public bool ShouldAimFor(AimMode mode)
@@ -244,8 +212,8 @@ public class Verb_ShootCE : Verb_LaunchProjectileCE
     public override void WarmupComplete()
     {
         var targetDist = (currentTarget.Cell - caster.Position).LengthHorizontal;
-        var aimTicks = (int)Mathf.Lerp(AimTicksMin, AimTicksMax, (targetDist / 100));
-        if (ShouldAim && !_isAiming)
+        var aimTicks = AccuracyMath.AimPreparationTicks(targetDist, ShootingAccuracy, AimingAccuracy);
+        if (ShouldAim && !_isAiming && aimTicks > 0)
         {
             if (caster is Building_TurretGunCE turret)
             {

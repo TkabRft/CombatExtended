@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using Verse;
+using CombatExtended.Utilities;
 
 namespace CombatExtended;
 public static class CE_Math
@@ -158,7 +159,7 @@ public static class CE_Math
         }
 
         // constants are reverse-extracted from Verb_LaunchProjectileCE's target position code, and then combined (3.5f / 50)
-        float SE = 0.07f * (2 - aimingAccuracy) / sightsEfficiency;
+        float SE = 0.07f * AccuracyMath.Visibility(aimingAccuracy) / sightsEfficiency;
         float spdsq = (2 * shotSpeed * shotSpeed);
 
         float zScore_target = Mathf.Abs((float)NormalCdfInverse(threshold));

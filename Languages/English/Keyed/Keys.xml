@@ -22,7 +22,7 @@
 	<CE_SuppressFireLabel>Suppress</CE_SuppressFireLabel>
 	<CE_HoldFireLabel>Hold fire</CE_HoldFireLabel>
 	<CE_ToggleFireModeDesc>Toggle fire mode.</CE_ToggleFireModeDesc>
-	<CE_ToggleAimModeDesc>Toggle aim mode.</CE_ToggleAimModeDesc>
+	<CE_ToggleAimModeDesc>Toggle aim mode.\n\nAimed shots use sights to reduce sway and take extra preparation; exceptional aiming accuracy and weapon handling shorten this delay. Snapshots fire sooner with more sway. Suppressive fire prioritizes keeping enemies suppressed.</CE_ToggleAimModeDesc>
 
 	<!-- Bipod system -->
 	<CE_Bipod_Set_Up>Bipod IS set up</CE_Bipod_Set_Up>
@@ -46,6 +46,7 @@
 	<CE_TargetWidth>Target width</CE_TargetWidth>
 
 	<CE_EstimatedHitChance>Estimated hit chance</CE_EstimatedHitChance>
+	<CE_AccuracyCurveExplanation>Accuracy conversion: diminishing returns, with continued gains beyond the original curve.</CE_AccuracyCurveExplanation>
 
 	<!-- Melee attack tooltip -->
 	<CE_AttackedBy>Attacked by {1_labelShort}</CE_AttackedBy>

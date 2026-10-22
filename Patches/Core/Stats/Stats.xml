@@ -248,16 +248,10 @@
 	<Operation Class="PatchOperationReplace">
 		<xpath>Defs/StatDef[defName="ShootingAccuracyPawn"]/description</xpath>
 		<value>
-			<description>How well a shooter can hold a gun steady when aiming and compensate for recoil.\n\nThe total sway is calculated as:\n(4.5 - weapon handling) * weapon sway factor\n\nThe recoil per shot is determined by multiplying this value against the weapon's inherent recoil amount and increases after every shot in a burst.</description>
+			<description>How well a shooter holds a weapon steady, compensates for recoil. Higher values continue to improve control with diminishing returns. Handling beyond an unmodified expert's level provides stronger recoil control and shortens extra aim preparation. Weapon handling does not reduce inherent weapon spread.</description>
 		</value>
 	</Operation>
 
-	<Operation Class="PatchOperationAdd">
-		<xpath>Defs/StatDef[defName="ShootingAccuracyPawn"]</xpath>
-		<value>
-			<maxValue>13</maxValue>
-		</value>
-	</Operation>
 
 	<Operation Class="PatchOperationConditional">
 		<xpath>Defs/ThingDef[defName="ShootingAccuracyPawn"]/skillNeedOffsets/li[@Class="SkillNeed_Direct"]</xpath>

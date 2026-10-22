@@ -11,6 +11,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="..\CombatExtended\Utilities\AccuracyMath.cs" Link="Accuracy\AccuracyMath.cs" />
+        <Compile Include="..\CombatExtended\CombatExtended\StatParts\StatPart_UncappedAccuracyCurve.cs" Link="Accuracy\StatPart_UncappedAccuracyCurve.cs" />
         <Compile Include="..\CombatExtended\Harmony\Harmony_LordToil_Siege_Builders.cs" Link="SiegeBuilders\Harmony_LordToil_Siege_Builders.cs" />
         <Compile Include="..\CombatExtended\Utilities\SubsequentShotState.cs" Link="SubsequentShots\SubsequentShotState.cs" />
         <Compile Include="..\CombatExtended\Utilities\MeleeStatMath.cs" Link="MeleeStats\MeleeStatMath.cs" />

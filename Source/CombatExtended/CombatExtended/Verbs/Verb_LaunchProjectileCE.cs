@@ -137,13 +137,13 @@ public class Verb_LaunchProjectileCE : Verb
         {
 
             isTurretMannable = (Caster.TryGetComp<CompMannable>() != null);
-            return Mathf.Min(CasterShootingAccuracyValue(Shooter), 4.5f);
+            return CasterShootingAccuracyValue(Shooter);
         }
 
     }
-    public float AimingAccuracy => Mathf.Min(Shooter.GetStatValue(CE_StatDefOf.AimingAccuracy), 1.5f); //equivalent of ShooterPawn?.GetStatValue(CE_StatDefOf.AimingAccuracy) ?? caster.GetStatValue(CE_StatDefOf.AimingAccuracy)
+    public float AimingAccuracy => Shooter.GetStatValue(CE_StatDefOf.AimingAccuracy);
     public float SightsEfficiency => EquipmentSource?.GetStatValue(CE_StatDefOf.SightsEfficiency) ?? 1f;
-    public virtual float SwayAmplitude => Mathf.Max(0, (4.5f - ShootingAccuracy) * (EquipmentSource?.GetStatValue(CE_StatDefOf.SwayFactor) ?? 1f));
+    public virtual float SwayAmplitude => AccuracyMath.HandlingSway(ShootingAccuracy) * (EquipmentSource?.GetStatValue(CE_StatDefOf.SwayFactor) ?? 1f);
 
     public virtual CompAmmoUser CompAmmo => compAmmo ??= EquipmentSource?.TryGetComp<CompAmmoUser>();
 
@@ -643,8 +643,8 @@ public class Verb_LaunchProjectileCE : Verb
         float maxY = recoil;
         float minY = -recoil / 3;
 
-        float recoilMagnitude = numShotsFired == 0 ? 0 : Mathf.Pow((5 - ShootingAccuracy), (Mathf.Min(10, numShotsFired) / 6.25f));
-        float nextRecoilMagnitude = Mathf.Pow((5 - ShootingAccuracy), (Mathf.Min(10, numShotsFired + 1) / 6.25f));
+        float recoilMagnitude = AccuracyMath.Recoil(ShootingAccuracy, numShotsFired);
+        float nextRecoilMagnitude = AccuracyMath.Recoil(ShootingAccuracy, numShotsFired + 1);
 
         rotation += recoilMagnitude * Rand.Range(minX, maxX);
         var trd = Rand.Range(minY, maxY);

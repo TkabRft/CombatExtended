@@ -6,6 +6,7 @@ using RimWorld;
 using Verse;
 using UnityEngine;
 using RimWorld.Planet;
+using CombatExtended.Utilities;
 
 namespace CombatExtended;
 public class ShiftVecReport
@@ -74,7 +75,7 @@ public class ShiftVecReport
         {
             if (accuracyFactorInt < 0)
             {
-                accuracyFactorInt = (1.5f - aimingAccuracy) / sightsEfficiency;
+                accuracyFactorInt = AccuracyMath.RangeAccuracy(aimingAccuracy, sightsEfficiency);
             }
             return accuracyFactorInt;
         }
@@ -113,7 +114,7 @@ public class ShiftVecReport
                 {
                     se = 0.02f;
                 }
-                visibilityShiftInt = environmentShift * (shotDist / 50 / se) * (2 - aimingAccuracy);
+                visibilityShiftInt = environmentShift * (shotDist / 50 / se) * AccuracyMath.Visibility(aimingAccuracy);
             }
             return visibilityShiftInt;
         }
@@ -155,8 +156,8 @@ public class ShiftVecReport
         get
         {
             return leadDist * Mathf.Min(accuracyFactor * 0.25f, 2.5f)
-                   + Mathf.Min((blindFiring ? 1 : lightingShift) * CE_Utility.LightingRangeMultiplier(shotDist) * leadDist * 0.25f, (blindFiring ? 100f : 2.0f))
-                   + Mathf.Min((blindFiring ? 0 : smokeDensity) * 0.5f, 2.0f);
+                   + (Mathf.Min((blindFiring ? 1 : lightingShift) * CE_Utility.LightingRangeMultiplier(shotDist) * leadDist * 0.25f, (blindFiring ? 100f : 2.0f))
+                   + Mathf.Min((blindFiring ? 0 : smokeDensity) * 0.5f, 2.0f)) * AccuracyMath.EnvironmentalLead(aimingAccuracy);
         }
     }
 

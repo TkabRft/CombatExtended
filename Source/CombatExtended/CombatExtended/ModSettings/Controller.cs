@@ -124,6 +124,7 @@ public class Controller : Mod
 
         // Initialize the DefUtility (a caching system for common checks on defs)
         LongEventHandler.QueueLongEvent(DefUtility.Initialize, "CE_LongEvent_DefUtility", false, null);
+        LongEventHandler.QueueLongEvent(StatPart_UncappedAccuracyCurve.Initialize, "CE_LongEvent_DefUtility", false, null);
 
 
 
